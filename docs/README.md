@@ -50,6 +50,9 @@ CONTEXT.md ──────────────► linguagem ubíqua (font
 | [engineering/estudo-shadcn.md](engineering/estudo-shadcn.md) | Guia de reaproveitamento do shadcn/ui (CLI, componentes instalados, regras de uso). | referência |
 | [engineering/arquitetura-de-modulos.md](engineering/arquitetura-de-modulos.md) | Deep modules & seams do domínio SESI: módulos profundos a imitar, oportunidades de deepening e onde a camada de domínio (Vaga, SLA, RBAC) se encaixa. | referência |
 | [engineering/checklist-front-end.md](engineering/checklist-front-end.md) | Checklist de front-end: gate de PR (lint/test/build/knip), arquitetura de módulos, rotas, dados, forms, testes, performance, segurança e processo CE. | ativo |
+| [engineering/handoff-dev.md](engineering/handoff-dev.md) | Handoff front-end: mapa do domínio, porta de persistência (trocar mock por API), regras implementadas, rodar/testar/deploy. | ativo |
+| [engineering/handoff-backend.md](engineering/handoff-backend.md) | Handoff backend: modelo de dados, regras que o servidor garante, especificação do SLA/feriados, auth/RBAC (B3), critérios de aceite e sequência sugerida. | ativo |
+| [engineering/contrato-api.md](engineering/contrato-api.md) | Contrato de API esperado pelo front: endpoints, query params de listagem, envelope de resposta e formato de erro. | ativo |
 
 ## ADRs — decisões duras
 

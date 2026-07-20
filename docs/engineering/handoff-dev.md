@@ -2,7 +2,8 @@
 
 Guia de quem recebe o repositório para evoluir o protótipo. Leia junto com
 [`../../CLAUDE.md`](../../CLAUDE.md) (contrato), [`../../CONTEXT.md`](../../CONTEXT.md) (vocabulário) e
-[`arquitetura-de-modulos.md`](arquitetura-de-modulos.md) (padrões).
+[`arquitetura-de-modulos.md`](arquitetura-de-modulos.md) (padrões). Quem vai construir a **API real**
+tem um guia dedicado: [handoff-backend.md](handoff-backend.md).
 
 ## O que é este código
 
