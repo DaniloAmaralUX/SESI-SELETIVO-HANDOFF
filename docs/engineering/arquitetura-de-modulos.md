@@ -3,9 +3,8 @@ titulo: Arquitetura de Módulos — Deep Modules & Seams do Domínio SESI
 tipo: engineering-reference
 status: referência
 baseline_tecnica: app/ (React 19 · Vite 8 · TanStack Router/Query/Table · shadcn/ui · Tailwind v4)
-metodo: skill codebase-design (mattpocock) aplicada ao app + linguagem ubíqua do CONTEXT.md
+metodo: auditoria de módulos (princípios de "A Philosophy of Software Design") + linguagem ubíqua do CONTEXT.md
 fontes:
-  - .agents/skills/codebase-design/{SKILL,DEEPENING,DESIGN-IT-TWICE}.md
   - auditoria de arquitetura do app/ (2026-07-13)
   - ../adr/0001-status-e-acao-como-eixos-independentes.md
   - ../adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md
@@ -116,7 +115,7 @@ depende da porta, não do transporte.
 ### 3.5 RBAC — *seam de rota (enforcement ausente)*
 O **dado** de papel já existe (`stores/auth-store.ts` → `auth.user.role: string[]`), mas **nada aplica**.
 Adicionar um guard **`beforeLoad`** no layout route pathless `_authenticated/route.tsx` lendo o papel e
-redirecionando quando não autorizado — o padrão canônico do TanStack Router (confirmado via context7) que o
+redirecionando quando não autorizado — o padrão canônico do TanStack Router que o
 template omitiu. Mapear cada ator do [CONTEXT.md](../../CONTEXT.md) às operações permitidas.
 
 ### 3.6 Navegação — *ponto único de edição*
@@ -143,5 +142,5 @@ template).
 
 > **Opcional — Design It Twice.** Antes de codar o **motor de SLA**, vale desenhar a interface dele em ~3
 > variações (minimizar interface · maximizar flexibilidade · otimizar o caso comum) e comparar por depth,
-> locality e posição do seam — conforme `.agents/skills/codebase-design/DESIGN-IT-TWICE.md`. Fica como
+> locality e posição do seam. Fica como
 > próximo passo, fora deste esforço de organização.

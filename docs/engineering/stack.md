@@ -6,13 +6,12 @@ baseline_tecnica: app/ (React 19 · Vite 8 · TanStack Router/Query/Table · sha
 fontes:
   - app/package.json (versões reais)
   - app/vite.config.ts · app/components.json
-  - context7 (docs atuais: TanStack Router, Tailwind CSS v4)
 ---
 
 # Referência da Stack
 
 > O que cada peça faz, a versão em uso e **por que ela está aqui no contexto SESI**. As versões saem do
-> `app/package.json`; as recomendações de uso foram cruzadas com a documentação atual via **context7**.
+> `app/package.json`; as recomendações de uso foram cruzadas com a documentação oficial de cada biblioteca.
 > Para o funcionamento do shadcn/ui em si, ver [estudo-shadcn.md](estudo-shadcn.md).
 
 ## Panorama
@@ -39,7 +38,7 @@ tabelas, diálogos) vem do template; o domínio SESI (Vaga, eixos, SLA) ainda se
 | [TanStack Query](https://tanstack.com/query) | 5.99 | Cache/estado de servidor. **Configurado** (`QueryClient` com política de retry e tratamento de 401/403/500) mas ainda **sem consumidores** — é o seam pronto para a camada de dados. |
 | [TanStack Table](https://tanstack.com/table) | 8.21 | Motor headless das tabelas densas (a lista de Vagas será a tela-tese). Consumido via os primitivos em `src/components/data-table/`. |
 
-> **Padrões confirmados via context7 (TanStack Router):** o `@tanstack/router-plugin` deve vir **antes** do
+> **Padrões confirmados na documentação do TanStack Router:** o `@tanstack/router-plugin` deve vir **antes** do
 > `@vitejs/plugin-react` no `vite.config.ts` (é o caso aqui); fronteiras de autenticação se fazem com um
 > **layout route pathless** (`_authenticated`) carregando um `beforeLoad` que protege todos os filhos — é
 > exatamente onde o RBAC do SESI vai entrar (hoje ausente; ver ADRs e arquitetura de módulos).
@@ -57,7 +56,7 @@ tabelas, diálogos) vem do template; o domínio SESI (Vaga, eixos, SLA) ainda se
 | [Sonner](https://sonner.emilkowal.ski/) | 2.0 | Toasts. |
 | [cmdk](https://cmdk.paco.me/) | 1.1 | Command palette (busca global). |
 
-> **Confirmado via context7 (Tailwind v4):** tokens de tema são declarados em `@theme { --color-…: oklch(…) }`
+> **Confirmado na documentação do Tailwind v4:** tokens de tema são declarados em `@theme { --color-…: oklch(…) }`
 > e viram CSS variables; o modo escuro usa a variante `dark` (aqui via `@custom-variant dark`). É nesse
 > arquivo (`theme.css`) que entram os tokens de domínio `--status-*` / `--sla-*` (ver design system).
 

@@ -12,8 +12,8 @@ fontes:
 
 # STRATEGY — SESI Processo Seletivo
 
-Âncora de produto **upstream**. É lida por `/ce-ideate`, `/ce-brainstorm` e `/ce-plan` como grounding — as
-escolhas aqui devem fluir para toda feature. Mantê-la curta e viva; revisitar a cada fase entregue.
+Âncora de produto **upstream** — as escolhas aqui devem fluir para toda feature. Mantê-la curta e viva;
+revisitar a cada fase entregue.
 
 ## Visão
 
@@ -85,16 +85,7 @@ acessam o sistema nesta versão. (Ver [CONTEXT.md](CONTEXT.md) e B7.)
 - Secundárias: tempo mediano até resultado; nº de Vagas ativas por gargalo (Ação atual); tempo médio de
   gestor e de jurídico; adoção (Vagas criadas direto vs. importadas).
 - **Baseline pendente:** medir hoje a taxa de estouro do SLA e o volume mensal de Vagas para justificar o
-  build e avaliar resultado (questão aberta #8 do PRD). Alimenta `/ce-product-pulse` pós-deploy.
-
-## Tooling padrão do fluxo
-
-- **Context7** (`npx ctx7 setup --claude`) — docs atualizadas de bibliotecas; fonte preferida para API/config
-  da stack. **Auto-trigger autorizado.**
-- **ui-skills** (`npx ui-skills start`, ui-skills.com) — bancada de especialistas de UI/design (`dc-*` do
-  Design Compound) para o trabalho visual. **Auto-trigger autorizado.**
-
-Detalhe operacional da autorização: [CLAUDE.md](CLAUDE.md) § Tooling autorizado.
+  build e avaliar resultado (questão aberta #8 do PRD).
 
 ## Não-objetivos (evitar scope creep)
 

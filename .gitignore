@@ -38,10 +38,5 @@ Thumbs.db
 !.vscode/settings.json
 *.sw?
 
-# Compound Engineering — config local por-máquina (o .example.yaml fica versionado)
-.compound-engineering/*.local.yaml
-
-# Claude Code — configurações locais da máquina (as skills ficam versionadas via .agents/ + skills-lock.json)
-.claude/settings.local.json
-# Espelho de symlinks das skills (aponta para caminhos absolutos desta máquina) — a fonte é .agents/skills/
-.claude/skills/
+# Ferramentas de agente/IA locais (não versionadas)
+.claude/

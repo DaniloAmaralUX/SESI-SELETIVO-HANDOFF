@@ -19,7 +19,7 @@ applies_when: "Ao construir um protótipo mockado que também é handoff para de
 
 ## Context
 
-O protótipo é entregue **junto** como base para a implementação real (handoff). O CLAUDE.md exige que o
+O protótipo é entregue **junto** como base para a implementação real (handoff). A natureza da entrega (STRATEGY.md) exige que o
 mock seja "isolado e substituível": trocar dados mockados por API real **não pode exigir reescrever
 telas**. Sem uma fronteira clara, as telas importam o array mockado direto (`import { vagas }`) e cada
 uma vira um ponto de acoplamento ao mock.

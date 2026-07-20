@@ -35,10 +35,9 @@ vocabulário completo e canônico está em **[CONTEXT.md](CONTEXT.md)** — a fo
 ├── docs/               # Documentação (produto · design · engenharia · ADRs) — ver docs/README.md
 │   ├── product/        # PRD e revisão de requisitos
 │   ├── design/         # Arquitetura da Informação + Design System
-│   ├── engineering/    # Stack, estudo do shadcn, arquitetura de módulos
+│   ├── engineering/    # Stack, estudo do shadcn, arquitetura de módulos, handoff
 │   ├── adr/            # Architecture Decision Records
-│   ├── meta/           # Notas de tooling/skills
-│   └── _archive/       # Documentos supersedidos (histórico)
+│   └── solutions/      # Aprendizados de execução (gotchas e padrões)
 └── app/                # A aplicação (Vite + React 19 + TanStack + shadcn/ui + Tailwind v4)
 ```
 

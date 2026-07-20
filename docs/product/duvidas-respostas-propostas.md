@@ -6,7 +6,7 @@ data: 2026-07-13
 fontes:
   - duvidas-requisitos.pdf (v1) · duvidas-requisitos-v2.pdf (v2 — planilha real)
   - CONTEXT.md · STRATEGY.md · docs/adr/0001, 0002
-  - context7 (Zod 4, date-fns, TanStack Router — viabilidade técnica)
+  - documentação oficial (Zod 4, date-fns, TanStack Router — viabilidade técnica)
   - decisões de design do designer do projeto (2026-07-13)
 ---
 
@@ -66,7 +66,7 @@ minutos: % de vagas com resultado ≤20 dias úteis + volume mensal). Não bloqu
 verificado), desktop-first responsivo, linha da tabela acessível por teclado; estado vazio orienta para a
 importação (que é a Fase 3). Confirmável na evolução do design.
 
-## Viabilidade técnica confirmada (context7, 2026-07-13)
+## Viabilidade técnica confirmada (2026-07-13)
 
 - **Zod 4**: `z.enum([...] as const)` de array constante como fonte única de tipo + validação — padrão usado
   no schema da Vaga. `z.coerce.date()` para datas do mock.
