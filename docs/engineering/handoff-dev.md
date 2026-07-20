@@ -64,6 +64,28 @@ Passos sugeridos:
 - **LGPD**: campos sensíveis de candidato mascarados por papel (`detalhe/campo-sensivel.tsx`); o painel
   só mostra agregados.
 
+## Autenticação — como funciona hoje (mock) e o que a real deve cumprir
+
+**Não há autenticação real no protótipo — é proposital.** O provedor de auth é a decisão **B3, em
+aberto** (reunião de arquitetura com o TI: SSO do SESI vs. solução própria). Não procure integração
+com provedor no código; o que existe é um mock funcional:
+
+- **Login** (`app/src/features/auth/sign-in/`): o form valida os campos e grava um **token fake** —
+  não há chamada a servidor. Qualquer credencial "entra".
+- **Sessão** (`app/src/stores/auth-store.ts`): store Zustand que guarda usuário + token (persistido
+  em cookie). É o **seam da auth real** — a troca acontece aqui, sem mexer nas telas.
+- **Proteção de rota** (`app/src/routes/_authenticated/route.tsx`): layout pathless com `beforeLoad`;
+  sem token → redireciona ao login preservando o destino. O **papel** (`role`) já existe no store,
+  mas o RBAC fino por rota ainda não é aplicado (pendência abaixo).
+- **Papéis no protótipo**: um *role-switcher* simula os 3 papéis (`recrutadora`, `gestora-rh`,
+  `admin`) para testar o mascaramento LGPD (`lib/papel.ts`).
+
+**O que o front já espera da auth real** (detalhes em
+[handoff-backend.md § Autenticação e RBAC](handoff-backend.md) e [contrato-api.md](contrato-api.md)):
+`Authorization: Bearer <token>`; `401` → redirecionar ao login; `403` → papel sem permissão; regra
+**B7** (só `admin` vê/exporta dados sensíveis de candidato); o `por` da auditoria deriva do usuário
+autenticado **no servidor**.
+
 ## Decisões em aberto (não assumir sem confirmar)
 
 - **B3** — backend/auth/RBAC reais (reunião de arquitetura com o TI). Hoje: auth mockada, RBAC = role-switcher.
