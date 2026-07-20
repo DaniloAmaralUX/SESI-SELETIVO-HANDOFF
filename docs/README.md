@@ -17,7 +17,8 @@ CONTEXT.md ──────────────► linguagem ubíqua (font
      ├── produto ────────► o QUÊ  (PRD + revisão)
      ├── design ─────────► o COMO SE PARECE / SE NAVEGA (IA + Design System)
      ├── engenharia ─────► o COMO SE CONSTRÓI (stack + reuso + módulos)
-     └── adr ────────────► decisões que amarram tudo
+     ├── adr ────────────► decisões que amarram tudo
+     └── solutions ──────► aprendizados de execução (gotchas & padrões)
 ```
 
 ---
