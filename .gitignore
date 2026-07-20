@@ -1,0 +1,47 @@
+# Dependencies (qualquer nível, incl. app/node_modules)
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage / artifacts
+coverage/
+**/__screenshots__/
+.vitest-attachments/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sw?
+
+# Compound Engineering — config local por-máquina (o .example.yaml fica versionado)
+.compound-engineering/*.local.yaml
+
+# Claude Code — configurações locais da máquina (as skills ficam versionadas via .agents/ + skills-lock.json)
+.claude/settings.local.json
+# Espelho de symlinks das skills (aponta para caminhos absolutos desta máquina) — a fonte é .agents/skills/
+.claude/skills/

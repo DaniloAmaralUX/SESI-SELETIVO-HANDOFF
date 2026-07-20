@@ -1,0 +1,160 @@
+/* Identidade SESI (proposta do design-system, a validar com o manual de marca):
+   azul institucional #0057B8, azul-profundo no rail, neutros de aço/névoa,
+   âmbar reservado à SINALIZAÇÃO de SLA (tokens de status e SLA), não a
+   acento decorativo. Hexes convertidos para OKLCH (padrão do projeto). */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.215 0.018 255.7); /* grafite #141A22 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.215 0.018 255.7);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.215 0.018 255.7);
+  --primary: oklch(0.474 0.169 257.2); /* azul SESI #0057B8 */
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.973 0.006 264.5); /* névoa #F4F6FA */
+  --secondary-foreground: oklch(0.295 0.094 257.2); /* azul-profundo */
+  --muted: oklch(0.973 0.006 264.5);
+  --muted-foreground: oklch(0.506 0.025 252.7); /* aço #5B6673 */
+  --accent: oklch(0.955 0.014 257); /* realce sutil azulado (hover) */
+  --accent-foreground: oklch(0.474 0.169 257.2);
+  --destructive: oklch(0.551 0.182 27.7); /* vermelho #C6362F */
+  --border: oklch(0.912 0.011 257);
+  --input: oklch(0.912 0.011 257);
+  --ring: oklch(0.474 0.169 257.2); /* foco = azul SESI */
+  --chart-1: oklch(0.474 0.169 257.2); /* azul SESI */
+  --chart-2: oklch(0.785 0.164 77.6); /* âmbar */
+  --chart-3: oklch(0.551 0.131 152.8); /* verde */
+  --chart-4: oklch(0.295 0.094 257.2); /* azul-profundo */
+  --chart-5: oklch(0.506 0.025 252.7); /* aço */
+
+  /* Rail em azul-profundo #072B5A — a faixa institucional da marca */
+  --sidebar: oklch(0.295 0.094 257.2);
+  --sidebar-foreground: oklch(0.95 0.012 257);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.295 0.094 257.2);
+  --sidebar-accent: oklch(0.37 0.09 257);
+  --sidebar-accent-foreground: oklch(0.98 0.006 257);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.785 0.164 77.6); /* foco âmbar no rail escuro */
+
+  /* Status da Vaga — fundo de badge; no tema claro usar texto branco (AA >= 4.5:1) */
+  --status-aberta: oklch(0.55 0.145 250); /* azul SESI */
+  --status-suspensa: oklch(0.52 0.11 70); /* âmbar */
+  --status-congelada: oklch(0.52 0.085 220); /* ciano frio */
+  --status-cancelada: oklch(0.55 0.19 25); /* vermelho */
+  --status-finalizada: oklch(0.52 0.14 150); /* verde */
+  --status-arquivada: oklch(0.5 0.02 260); /* cinza neutro */
+
+  /* SLA (meta 20 dias úteis, ADR 0002) — mesma regra de texto dos status */
+  --sla-ok: oklch(0.52 0.14 150); /* verde */
+  --sla-atencao: oklch(0.52 0.11 70); /* âmbar */
+  --sla-estourado: oklch(0.55 0.19 25); /* vermelho */
+}
+
+.dark {
+  --background: oklch(0.17 0.02 257); /* grafite mais profundo */
+  --foreground: oklch(0.965 0.008 257);
+  --card: oklch(0.205 0.025 257);
+  --card-foreground: oklch(0.965 0.008 257);
+  --popover: oklch(0.205 0.025 257);
+  --popover-foreground: oklch(0.965 0.008 257);
+  --primary: oklch(
+    0.64 0.15 257
+  ); /* azul SESI clareado p/ contraste no escuro */
+  --primary-foreground: oklch(0.17 0.02 257);
+  --secondary: oklch(0.27 0.03 257);
+  --secondary-foreground: oklch(0.965 0.008 257);
+  --muted: oklch(0.27 0.03 257);
+  --muted-foreground: oklch(0.72 0.02 255);
+  --accent: oklch(0.3 0.04 257);
+  --accent-foreground: oklch(0.965 0.008 257);
+  --destructive: oklch(0.63 0.19 27.7);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.64 0.15 257);
+  --chart-1: oklch(0.64 0.15 257); /* azul SESI */
+  --chart-2: oklch(0.8 0.16 78); /* âmbar */
+  --chart-3: oklch(0.72 0.15 152); /* verde */
+  --chart-4: oklch(0.55 0.1 257); /* azul médio */
+  --chart-5: oklch(0.72 0.02 255); /* aço claro */
+
+  /* Rail no escuro: azul-profundo levemente rebaixado p/ assentar sobre o fundo */
+  --sidebar: oklch(0.21 0.035 257);
+  --sidebar-foreground: oklch(0.95 0.012 257);
+  --sidebar-primary: oklch(0.64 0.15 257);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.3 0.05 257);
+  --sidebar-accent-foreground: oklch(0.98 0.006 257);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.8 0.16 78);
+
+  /* Status da Vaga — mesma matiz do tema claro, mais claros; usar texto escuro (AA >= 4.5:1) */
+  --status-aberta: oklch(0.72 0.14 250); /* azul SESI */
+  --status-suspensa: oklch(0.8 0.14 80); /* âmbar */
+  --status-congelada: oklch(0.78 0.12 220); /* ciano frio */
+  --status-cancelada: oklch(0.7 0.17 25); /* vermelho */
+  --status-finalizada: oklch(0.76 0.16 150); /* verde */
+  --status-arquivada: oklch(0.72 0.02 260); /* cinza neutro */
+
+  /* SLA (meta 20 dias úteis, ADR 0002) — mesma regra de texto dos status */
+  --sla-ok: oklch(0.76 0.16 150); /* verde */
+  --sla-atencao: oklch(0.8 0.14 80); /* âmbar */
+  --sla-estourado: oklch(0.7 0.17 25); /* vermelho */
+}
+
+@theme inline {
+  /* Corpo/tabelas em IBM Plex Sans (default via --font-sans); títulos em Archivo;
+     dados/medidores de SLA em IBM Plex Mono. */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-plex: 'IBM Plex Sans', 'sans-serif';
+  --font-archivo: 'Archivo', 'sans-serif';
+  --font-mono: 'IBM Plex Mono', 'monospace';
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* habilita bg-status-aberta, text-sla-estourado etc. */
+  --color-status-aberta: var(--status-aberta);
+  --color-status-suspensa: var(--status-suspensa);
+  --color-status-congelada: var(--status-congelada);
+  --color-status-cancelada: var(--status-cancelada);
+  --color-status-finalizada: var(--status-finalizada);
+  --color-status-arquivada: var(--status-arquivada);
+  --color-sla-ok: var(--sla-ok);
+  --color-sla-atencao: var(--sla-atencao);
+  --color-sla-estourado: var(--sla-estourado);
+}
