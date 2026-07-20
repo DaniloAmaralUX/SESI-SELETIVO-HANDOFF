@@ -12,7 +12,7 @@ import { vagas as vagasSeed } from './vagas'
 
 // Porta de persistência (mock em memória). É o ÚNICO ponto de mutação das
 // Vagas — trocar o mock por API real significa reescrever só este arquivo, sem
-// tocar telas (CLAUDE.md §3.4). O estado some no reload: é o seam, não a API.
+// tocar telas (docs/engineering/arquitetura-de-modulos.md §3.4). O estado some no reload: é o seam, não a API.
 //
 // Toda mutação carimba auditoria (RF17) e anexa um evento ao histórico (RF16).
 // `por` identifica quem fez — no protótipo, o papel ativo (usePapel).

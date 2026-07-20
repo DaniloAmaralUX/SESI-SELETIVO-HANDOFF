@@ -4,7 +4,6 @@ tipo: checklist
 status: ativo (usar em todo PR do app/)
 data: 2026-07-20
 fontes:
-  - CLAUDE.md (contrato do repo)
   - docs/engineering/arquitetura-de-modulos.md
   - docs/engineering/stack.md
   - docs/engineering/handoff-dev.md
@@ -76,10 +75,9 @@ fontes:
 - [ ] Importação de planilha: validação de tipo/tamanho e neutralização de fórmulas (CSV injection).
 - [ ] Sem `dangerouslySetInnerHTML` com conteúdo não sanitizado.
 
-## 9. Processo (loop Compound Engineering)
+## 9. Processo
 
-- [ ] Feature nasceu de plano em `docs/plans/` (plan-first); bug começou em `/ce-debug`.
 - [ ] Trabalho não-trivial em branch/worktree; review antes de merge; CI verde.
-- [ ] Aprendizado não-óbvio documentado em `docs/solutions/` (`/ce-compound`); vocabulário novo de
+- [ ] Aprendizado não-óbvio documentado em `docs/solutions/`; vocabulário novo de
       domínio refletido no `CONTEXT.md`.
 - [ ] Docs afetados atualizados no mesmo PR (design system, IA, handoff) — doc vivo.

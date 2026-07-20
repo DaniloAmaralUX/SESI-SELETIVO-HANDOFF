@@ -1,11 +1,11 @@
 # Documentação — SESI Processo Seletivo
 
 Índice único da documentação do projeto. Organizada por **audiência** (produto · design · engenharia),
-mais **ADRs** (decisões duras) e **meta** (notas de tooling). O vocabulário do domínio é transversal e
-mora na raiz: **[../CONTEXT.md](../CONTEXT.md)**.
+mais **ADRs** (decisões duras) e **soluções** (aprendizados de execução). O vocabulário do domínio é
+transversal e mora na raiz: **[../CONTEXT.md](../CONTEXT.md)**.
 
 > Convenções de status: `proposta` = direção a validar · `em-revisao` = em ajuste · `v0.x` = versão inicial ·
-> `Aceita` = ADR em vigor · `instalada` = nota de skill/tooling · `arquivado` = histórico, não usar como fonte.
+> `Aceita` = ADR em vigor.
 
 ---
 
@@ -46,10 +46,10 @@ CONTEXT.md ──────────────► linguagem ubíqua (font
 
 | Documento | Descrição | Status |
 |---|---|---|
-| [engineering/stack.md](engineering/stack.md) | Referência da stack: cada biblioteca, versão, papel no projeto e link oficial (validado via context7). | referência |
+| [engineering/stack.md](engineering/stack.md) | Referência da stack: cada biblioteca, versão, papel no projeto e link oficial. | referência |
 | [engineering/estudo-shadcn.md](engineering/estudo-shadcn.md) | Guia de reaproveitamento do shadcn/ui (CLI, componentes instalados, regras de uso). | referência |
 | [engineering/arquitetura-de-modulos.md](engineering/arquitetura-de-modulos.md) | Deep modules & seams do domínio SESI: módulos profundos a imitar, oportunidades de deepening e onde a camada de domínio (Vaga, SLA, RBAC) se encaixa. | referência |
-| [engineering/checklist-front-end.md](engineering/checklist-front-end.md) | Checklist de front-end: gate de PR (lint/test/build/knip), arquitetura de módulos, rotas, dados, forms, testes, performance, segurança e processo CE. | ativo |
+| [engineering/checklist-front-end.md](engineering/checklist-front-end.md) | Checklist de front-end: gate de PR (lint/test/build/knip), arquitetura de módulos, rotas, dados, forms, testes, performance e segurança. | ativo |
 | [engineering/handoff-dev.md](engineering/handoff-dev.md) | Handoff front-end: mapa do domínio, porta de persistência (trocar mock por API), regras implementadas, rodar/testar/deploy. | ativo |
 | [engineering/handoff-backend.md](engineering/handoff-backend.md) | Handoff backend: modelo de dados, regras que o servidor garante, especificação do SLA/feriados, auth/RBAC (B3), critérios de aceite e sequência sugerida. | ativo |
 | [engineering/contrato-api.md](engineering/contrato-api.md) | Contrato de API esperado pelo front: endpoints, query params de listagem, envelope de resposta e formato de erro. | ativo |
@@ -61,15 +61,7 @@ CONTEXT.md ──────────────► linguagem ubíqua (font
 | [adr/0001-status-e-acao-como-eixos-independentes.md](adr/0001-status-e-acao-como-eixos-independentes.md) | Status (6 valores) e Ação atual (10 etapas) modelados como **dois eixos independentes**; nunca misturados. | Aceita |
 | [adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md](adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md) | SLA em **dias úteis** por um **motor próprio** alimentado por tabela de feriados configurável por Unidade. | Aceita |
 
-## Meta — notas de tooling
+## Soluções — aprendizados de execução
 
-| Documento | Descrição | Status |
-|---|---|---|
-| [meta/skill-design-lab.md](meta/skill-design-lab.md) | Nota sobre a skill `design-lab` (exploração de UI em 5 variações) e adaptação ao stack Vite/Tailwind v4. | `instalada` |
-| [meta/skill-vite.md](meta/skill-vite.md) | Nota sobre a skill `vite` (referência de build/config Vite 8) e sua conexão com o `vite.config.ts` real. | `instalada` |
-
-## Arquivo
-
-| Documento | Motivo |
-|---|---|
-| [_archive/revisao-prd-e-reaproveitamento.md](_archive/revisao-prd-e-reaproveitamento.md) | Versão curta (taxonomia P1/P2/P3) da revisão do PRD. **Supersedida** por `product/PRD-review-e-plano-reaproveitamento.md` (taxonomia B1–B8, adotada pelo PRD). Mantida só para histórico. |
+Registros curtos de problemas não-óbvios resolvidos durante a construção (gotchas de tooling, padrões
+de arquitetura, erros de lógica). Índice e convenções em [solutions/README.md](solutions/README.md).

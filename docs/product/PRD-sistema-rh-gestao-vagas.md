@@ -143,8 +143,7 @@ jurídico, gestor, candidato selecionado, histórico e indicadores gerenciais.
 > Seção adicionada na revisão do PRD (não altera o texto original da Q.A. acima).
 > Registra as resoluções acordadas achado a achado (taxonomia **B1–B8**). Referências: ver
 > [PRD-review-e-plano-reaproveitamento.md](PRD-review-e-plano-reaproveitamento.md) (revisão canônica, origem
-> das decisões B1–B8) e [estudo-shadcn.md](../engineering/estudo-shadcn.md). A versão curta anterior desta
-> revisão foi arquivada em [../_archive/revisao-prd-e-reaproveitamento.md](../_archive/revisao-prd-e-reaproveitamento.md).
+> das decisões B1–B8) e [estudo-shadcn.md](../engineering/estudo-shadcn.md).
 
 ### B1 — Modelo de estados da vaga (RF05 / RF07 / RF08) ✔ decidido
 

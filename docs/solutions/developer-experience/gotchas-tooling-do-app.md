@@ -18,14 +18,14 @@ applies_when: "Ao rodar ou depurar o portão de qualidade do app (app/), remover
 # Gotchas do tooling do app
 
 Três armadilhas do tooling do `app/` (Vite + TanStack Router + Vitest browser-mode) que confundem a
-leitura do portão de qualidade. Descobertas no Loop 0 (limpeza do template shadcn-admin,
-[PR #4](https://github.com/DaniloAmaralUX/sesi-seletivo-estrutura/pull/4)). O comportamento é do
+leitura do portão de qualidade. Descobertas na limpeza inicial do template shadcn-admin.
+O comportamento é do
 tooling, não do código — saber disso evita "corrigir" um falso problema.
 
 ## Contexto
 
 O portão local é `pnpm lint && pnpm format:check && pnpm knip && pnpm test && pnpm build`
-(CLAUDE.md). Ao remover rotas/features e rodar esse portão em máquina Windows, três sinais enganam:
+(CONTRIBUTING.md). Ao remover rotas/features e rodar esse portão em máquina Windows, três sinais enganam:
 o `routeTree.gen.ts` fica dessincronizado, a suíte de testes falha de forma não-determinística, e o
 `knip` acusa "erros" que não são regressão.
 
