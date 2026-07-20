@@ -32,6 +32,7 @@ vocabulário completo e canônico está em **[CONTEXT.md](CONTEXT.md)** — a fo
 ├── CONTEXT.md          # Linguagem ubíqua — fonte única do vocabulário do domínio (leia primeiro)
 ├── README.md           # Este arquivo — porta de entrada
 ├── CONTRIBUTING.md     # Como rodar, testar e contribuir
+├── STRATEGY.md         # Âncora de produto — visão, princípios e roadmap
 ├── docs/               # Documentação (produto · design · engenharia · ADRs) — ver docs/README.md
 │   ├── product/        # PRD e revisão de requisitos
 │   ├── design/         # Arquitetura da Informação + Design System

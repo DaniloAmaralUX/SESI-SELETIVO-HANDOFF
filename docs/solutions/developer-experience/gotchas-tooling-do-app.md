@@ -18,9 +18,8 @@ applies_when: "Ao rodar ou depurar o portão de qualidade do app (app/), remover
 # Gotchas do tooling do app
 
 Três armadilhas do tooling do `app/` (Vite + TanStack Router + Vitest browser-mode) que confundem a
-leitura do portão de qualidade. Descobertas na limpeza inicial do template shadcn-admin.
-O comportamento é do
-tooling, não do código — saber disso evita "corrigir" um falso problema.
+leitura do portão de qualidade. Descobertas na limpeza inicial do template shadcn-admin. O comportamento
+é do tooling, não do código — saber disso evita "corrigir" um falso problema.
 
 ## Contexto
 
