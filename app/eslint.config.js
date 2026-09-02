@@ -7,7 +7,15 @@ import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
-  { ignores: ['dist', 'src/components/ui'] },
+  // iconiq/react-bits: material de registry de terceiro (mesmo tratamento do ui/)
+  {
+    ignores: [
+      'dist',
+      'src/components/ui',
+      'src/components/iconiq',
+      'src/components/react-bits',
+    ],
+  },
   {
     extends: [
       js.configs.recommended,
