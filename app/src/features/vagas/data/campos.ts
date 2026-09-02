@@ -3,6 +3,7 @@ import { type AcaoVaga, type StatusVaga, type Vaga } from './schema'
 // Rótulos pt-BR dos dois eixos — versão sem ícones (as opções com ícone para
 // UI vivem em data.tsx).
 export const STATUS_LABELS: Record<StatusVaga, string> = {
+  rascunho: 'Rascunho',
   aberta: 'Aberta',
   suspensa: 'Suspensa',
   congelada: 'Congelada',

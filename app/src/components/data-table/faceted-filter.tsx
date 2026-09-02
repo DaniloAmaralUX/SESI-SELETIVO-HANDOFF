@@ -81,7 +81,10 @@ export function DataTableFacetedFilter<TData, TValue>({
       </PopoverTrigger>
       <PopoverContent className='w-50 p-0' align='start'>
         <Command>
-          <CommandInput placeholder={title} />
+          <CommandInput
+            placeholder={`Buscar ${title?.toLowerCase()}`}
+            aria-label={`Buscar ${title?.toLowerCase()}`}
+          />
           <CommandList>
             <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
             <CommandGroup>
@@ -117,7 +120,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     )}
                     <span>{option.label}</span>
                     {facets?.get(option.value) && (
-                      <span className='ms-auto flex h-4 w-4 items-center justify-center font-mono text-xs'>
+                      <span className='ms-auto flex h-4 min-w-4 items-center justify-center px-1 font-mono text-xs tabular-nums'>
                         {facets.get(option.value)}
                       </span>
                     )}
@@ -133,7 +136,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     onSelect={() => column?.setFilterValue(undefined)}
                     className='justify-center text-center'
                   >
-                    Limpar filtros
+                    Limpar seleção
                   </CommandItem>
                 </CommandGroup>
               </>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -17,17 +17,18 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
-import { PasswordInput } from '@/components/password-input'
+import { Spinner } from '@/components/iconiq/spinner'
 
+// Protótipo SEM SENHA (decisão de demo): o e-mail identifica quem entra e o
+// acesso é liberado direto — auth real (B3) fica para o backend. Por isso
+// também não há "Esqueceu a senha".
 const formSchema = z.object({
   email: z.email({
-    error: (iss) => (iss.input === '' ? 'Informe seu e-mail.' : undefined),
+    error: (iss) =>
+      iss.input === ''
+        ? 'Informe seu e-mail.'
+        : 'Use um e-mail válido, como nome@sesi.org.br.',
   }),
-  password: z
-    .string()
-    .min(1, 'Informe sua senha.')
-    .min(7, 'A senha deve ter pelo menos 7 caracteres.'),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -47,37 +48,45 @@ export function UserAuthForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   })
+
+  function signIn(email: string) {
+    // Autenticação mockada (B3): entra sempre, como Recrutadora — o
+    // PapelSwitcher permite simular os demais papéis
+    const mockUser = {
+      accountNo: 'ACC001',
+      email,
+      role: ['recrutadora'],
+      // eslint-disable-next-line react-hooks/purity -- só executa em event handlers (login mock)
+      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 horas
+    }
+
+    auth.setUser(mockUser)
+    auth.setAccessToken('mock-access-token')
+
+    const targetPath = redirectTo || '/'
+    navigate({ to: targetPath, replace: true })
+  }
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    // Autenticação mockada (B3): entra sempre, como Recrutadora — o
-    // PapelSwitcher permite simular os demais papéis
     toast.promise(sleep(2000), {
       loading: 'Entrando...',
       success: () => {
         setIsLoading(false)
-
-        const mockUser = {
-          accountNo: 'ACC001',
-          email: data.email,
-          role: ['recrutadora'],
-          exp: Date.now() + 24 * 60 * 60 * 1000, // 24 horas
-        }
-
-        auth.setUser(mockUser)
-        auth.setAccessToken('mock-access-token')
-
-        const targetPath = redirectTo || '/'
-        navigate({ to: targetPath, replace: true })
-
-        return `Bem-vinda de volta, ${data.email}!`
+        signIn(data.email)
+        return `Você entrou como ${data.email}.`
       },
-      error: 'Erro ao entrar',
+      error: 'Não foi possível entrar. Verifique sua conexão e tente de novo.',
     })
+  }
+
+  function onMicrosoftLogin() {
+    const email = 'recrutadora@sesi.org.br'
+    signIn(email)
+    toast.success(`Você entrou como ${email}.`)
   }
 
   return (
@@ -94,28 +103,17 @@ export function UserAuthForm({
             <FormItem>
               <FormLabel>E-mail</FormLabel>
               <FormControl>
-                <Input placeholder='nome@sesi.org.br' {...field} />
+                <Input
+                  type='email'
+                  inputMode='email'
+                  autoComplete='email'
+                  spellCheck={false}
+                  autoCapitalize='none'
+                  placeholder='nome@sesi.org.br'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='password'
-          render={({ field }) => (
-            <FormItem className='relative'>
-              <FormLabel>Senha</FormLabel>
-              <FormControl>
-                <PasswordInput placeholder='********' {...field} />
-              </FormControl>
-              <FormMessage />
-              <Link
-                to='/forgot-password'
-                className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
-              >
-                Esqueceu a senha?
-              </Link>
             </FormItem>
           )}
         />
@@ -123,7 +121,55 @@ export function UserAuthForm({
           {isLoading ? <Spinner /> : <LogIn />}
           Entrar
         </Button>
+
+        <div className='relative my-2'>
+          <div className='absolute inset-0 flex items-center'>
+            <span className='w-full border-t' />
+          </div>
+          <div className='relative flex justify-center text-xs tracking-wider uppercase'>
+            <span className='bg-background px-2 text-muted-foreground'>ou</span>
+          </div>
+        </div>
+
+        <Button
+          type='button'
+          variant='outline'
+          disabled={isLoading}
+          onClick={onMicrosoftLogin}
+        >
+          <MicrosoftLogo />
+          Entrar com Microsoft
+        </Button>
       </form>
     </Form>
+  )
+}
+
+function MicrosoftLogo() {
+  return (
+    <svg viewBox='0 0 21 21' aria-hidden='true' className='size-4'>
+      <rect x='1' y='1' width='9' height='9' fill='oklch(0.651 0.206 35.638)' />
+      <rect
+        x='11'
+        y='1'
+        width='9'
+        height='9'
+        fill='oklch(0.721 0.191 128.857)'
+      />
+      <rect
+        x='1'
+        y='11'
+        width='9'
+        height='9'
+        fill='oklch(0.685 0.156 239.642)'
+      />
+      <rect
+        x='11'
+        y='11'
+        width='9'
+        height='9'
+        fill='oklch(0.829 0.171 81.038)'
+      />
+    </svg>
   )
 }

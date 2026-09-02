@@ -1,3 +1,4 @@
+# Pacotes que o pnpm 10 pode compilar na instalação (postinstall/build scripts).
+# Sem esta permissão o esbuild não compila e o Vite não sobe.
 allowBuilds:
-  '@clerk/shared': true
   esbuild: true

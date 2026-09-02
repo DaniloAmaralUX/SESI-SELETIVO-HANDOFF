@@ -15,11 +15,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@/components/iconiq/spinner'
 
 const formSchema = z.object({
   email: z.email({
-    error: (iss) => (iss.input === '' ? 'Informe seu e-mail.' : undefined),
+    error: (iss) =>
+      iss.input === ''
+        ? 'Informe seu e-mail.'
+        : 'Use um e-mail válido, como nome@sesi.org.br.',
   }),
 })
 
@@ -45,7 +48,7 @@ export function ForgotPasswordForm({
         form.reset()
         return `E-mail enviado para ${data.email}`
       },
-      error: 'Erro ao enviar',
+      error: 'Não foi possível enviar o e-mail. Tente de novo em instantes.',
     })
   }
 
@@ -63,14 +66,22 @@ export function ForgotPasswordForm({
             <FormItem>
               <FormLabel>E-mail</FormLabel>
               <FormControl>
-                <Input placeholder='nome@sesi.org.br' {...field} />
+                <Input
+                  type='email'
+                  inputMode='email'
+                  autoComplete='email'
+                  spellCheck={false}
+                  autoCapitalize='none'
+                  placeholder='nome@sesi.org.br'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button className='mt-2' disabled={isLoading}>
-          Continuar
+          Enviar link de redefinição
           {isLoading ? <Spinner /> : <ArrowRight />}
         </Button>
       </form>

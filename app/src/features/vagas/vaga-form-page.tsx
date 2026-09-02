@@ -38,9 +38,10 @@ export function NovaVagaPage() {
         </Button>
       </div>
       <div>
-        <h2 className='text-2xl font-bold tracking-tight'>Nova vaga</h2>
+        <h1 className='text-2xl font-bold tracking-tight'>Nova vaga</h1>
         <p className='text-muted-foreground'>
-          A vaga nasce com status Aberta e o SLA começa a contar.
+          A vaga é criada como Rascunho. O prazo (SLA) começa a contar quando
+          você muda o status para Aberta.
         </p>
       </div>
       <VagaForm mode='criar' />
@@ -67,7 +68,7 @@ export function EditarVagaPage() {
       {vaga ? (
         <>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Editar vaga</h2>
+            <h1 className='text-2xl font-bold tracking-tight'>Editar vaga</h1>
             <p className='text-muted-foreground'>
               Chamado {vaga.chamado} · {vaga.cargo}
             </p>
@@ -76,9 +77,9 @@ export function EditarVagaPage() {
         </>
       ) : (
         <div className='flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center'>
-          <h2 className='text-2xl font-bold tracking-tight'>
+          <h1 className='text-2xl font-bold tracking-tight'>
             Vaga não encontrada
-          </h2>
+          </h1>
           <Button asChild>
             <Link to='/vagas'>
               <ArrowLeft className='size-4' />

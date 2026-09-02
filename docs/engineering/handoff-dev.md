@@ -59,19 +59,88 @@ Passos sugeridos:
 
 - **Dois eixos independentes** (ADR 0001): Status (situação) e Ação atual (etapa) nunca se misturam.
 - **Transições de Status** pela matriz B1 (`transicoes.ts`); **motivo obrigatório** ao Cancelar.
+- **Rascunho** (revisão set/2026): a vaga nasce em `rascunho` e o SLA **só começa** em `rascunho → aberta`,
+  transição que re-carimba `dataAbertura`/`dataAcao`. `rascunho → cancelada` preserva a data digitada —
+  a distinção está coberta por teste em `data/vagas-store.test.ts`.
+- **Observações por etapa** (revisão set/2026): trilha **append-only** por vaga, até 500 caracteres
+  (`OBSERVACAO_MAX_CHARS`), validada na porta de persistência. Cada registro vira evento `observacao` no
+  histórico e sai na exportação CSV. Não há edição nem remoção.
 - **SLA**: 20 dias úteis, da abertura à Divulgação do resultado; feriados nacionais (inclusive móveis) +
-  por Unidade; pausa aproximada nas paradas. Tempo do jurídico corre em **dias corridos**.
+  por Unidade; pausa aproximada nas paradas. Tempo do jurídico corre em **dias úteis** (revisão set/2026).
 - **LGPD**: campos sensíveis de candidato mascarados por papel (`detalhe/campo-sensivel.tsx`); o painel
   só mostra agregados.
+
+## Autenticação — como funciona hoje (mock) e o que a real deve cumprir
+
+**Não há autenticação real no protótipo — é proposital.** O provedor de auth é a decisão **B3, em
+aberto** (reunião de arquitetura com o TI: SSO do SESI vs. solução própria). Não procure integração
+com provedor no código; o que existe é um mock funcional:
+
+- **Login** (`app/src/features/auth/sign-in/`): o form valida os campos e grava um **token fake** —
+  não há chamada a servidor. Qualquer credencial "entra".
+- **Sessão** (`app/src/stores/auth-store.ts`): store Zustand que guarda usuário + token (persistido
+  em cookie). É o **seam da auth real** — a troca acontece aqui, sem mexer nas telas.
+- **Proteção de rota** (`app/src/routes/_authenticated/route.tsx`): layout pathless com `beforeLoad`;
+  sem token → redireciona ao login preservando o destino. O **papel** (`role`) já existe no store,
+  mas o RBAC fino por rota ainda não é aplicado (pendência abaixo).
+- **Papéis no protótipo**: um *role-switcher* simula os 3 papéis (`recrutadora`, `gestora-rh`,
+  `admin`) para testar o mascaramento LGPD (`lib/papel.ts`).
+
+**O que o front já espera da auth real** (detalhes em
+[handoff-backend.md § Autenticação e RBAC](handoff-backend.md) e [contrato-api.md](contrato-api.md)):
+`Authorization: Bearer <token>`; `401` → redirecionar ao login; `403` → papel sem permissão; regra
+**B7** (só `admin` vê/exporta dados sensíveis de candidato); o `por` da auditoria deriva do usuário
+autenticado **no servidor**.
 
 ## Decisões em aberto (não assumir sem confirmar)
 
 - **B3** — backend/auth/RBAC reais (reunião de arquitetura com o TI). Hoje: auth mockada, RBAC = role-switcher.
 - **RBAC no `beforeLoad`** do layout `_authenticated/route.tsx` — o dado de papel existe em
   `stores/auth-store.ts`, falta aplicar o guard.
-- **N1/N2** — de-para do vocabulário real (planilha) ↔ canônico 6×10. Os enums são dado remapeável.
+- **N1/N2** — de-para do vocabulário real (planilha) ↔ canônico 7×10. Os enums são dado remapeável.
 - **Reabertura**, **feriados municipais exatos**, **baseline de SLA** — ver
   [`../product/duvidas-respostas-propostas.md`](../product/duvidas-respostas-propostas.md).
+
+## Material de registry — leia antes de ligar um componente novo
+
+`app/src/components/iconiq/` (119 componentes) e `app/src/components/react-bits/`
+são **material de terceiros baixado sob demanda**, não código do projeto. Essas
+duas pastas, mais `components/ui/`, estão fora do **ESLint**, do **Knip** e do
+`include` do `tsconfig.app.json` — na prática, **o gate de qualidade não enxerga
+esse código**. Um componente ligado às pressas passa no `pnpm build` e quebra no
+browser.
+
+Antes de ligar qualquer componente dessas pastas:
+
+1. **Chamadas de rede.** Alguns buscam dados em serviços de terceiros — hoje
+   `contribution-graph.tsx` (`github-contributions-api.jogruber.de`) e os que
+   montam favicon via `google.com/s2/favicons` e `icons.duckduckgo.com`. Este é
+   um sistema que trata dados de candidatos sob LGPD: ligar um desses é decisão
+   consciente, não descuido.
+2. **`process.env`.** Não existe `process` no browser com Vite. Todo o material
+   já foi saneado para `import.meta.env.MODE`, mas componentes baixados depois
+   voltam a trazer o padrão do Next.js.
+3. **Cores hard-coded.** O projeto usa OKLCH + tokens; hexadecimal solto fura o
+   tema claro/escuro e a identidade SESI.
+4. **Rodar o gate depois:** `pnpm lint && pnpm build && pnpm test`.
+
+A proveniência e a situação de licença de cada bloco estão em
+[`../../NOTICE.md`](../../NOTICE.md) — inclui duas pendências para o jurídico.
+
+## Camadas de CSS (a ordem importa)
+
+`app/src/styles/index.css` empilha, nesta ordem:
+
+1. `@import './theme.css'` — paleta SESI e os tokens de domínio
+   `--status-*` / `--sla-*`;
+2. o `:root` / `.dark` do preset shadcn `bLFpNRU7U`, que **redeclara `:root` e
+   por isso vence o theme.css**;
+3. a **camada de marca**, no fim do arquivo, que devolve os tokens azuis do SESI
+   por cima do preset.
+
+Sem o passo 3 o app fica com o azul genérico do preset e o `theme.css` vira
+código morto. Ao aplicar um preset novo, reconferir se a camada de marca
+continua **depois** do bloco do preset.
 
 ## Rodar, testar, buildar
 

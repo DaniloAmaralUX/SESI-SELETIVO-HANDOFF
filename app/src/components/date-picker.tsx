@@ -13,6 +13,10 @@ type DatePickerProps = {
   selected: Date | undefined
   onSelect: (date: Date | undefined) => void
   placeholder?: string
+  // Associação com rótulo externo: id no trigger + aria-labelledby
+  // apontando para o <Label id=...> (e opcionalmente o próprio trigger).
+  id?: string
+  'aria-labelledby'?: string
   // Cronograma registra datas futuras; auditoria/medições, só passadas.
   desabilitarFuturo?: boolean
   // Campos opcionais podem ser limpos sem reabrir o calendário
@@ -23,6 +27,8 @@ export function DatePicker({
   selected,
   onSelect,
   placeholder = 'Selecione a data',
+  id,
+  'aria-labelledby': ariaLabelledby,
   desabilitarFuturo = false,
   limpavel = false,
 }: DatePickerProps) {
@@ -33,6 +39,8 @@ export function DatePicker({
           <Button
             type='button'
             variant='outline'
+            id={id}
+            aria-labelledby={ariaLabelledby}
             data-empty={!selected}
             className='w-full justify-start text-start font-normal data-[empty=true]:text-muted-foreground'
           >

@@ -5,6 +5,7 @@ import { type StatusVaga } from '../data/schema'
 
 // Mapa estático — o Tailwind só gera classes escritas por extenso
 const statusBgClass: Record<StatusVaga, string> = {
+  rascunho: 'bg-status-rascunho',
   aberta: 'bg-status-aberta',
   suspensa: 'bg-status-suspensa',
   congelada: 'bg-status-congelada',
@@ -24,10 +25,9 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <Badge
       className={cn(
-        // Premissa: todos os tokens --status-* contrastam com branco (claro)
-        // e neutro-950 (escuro). Se algum token clarear, expor pares
-        // --status-*-foreground no theme.css e usar aqui.
-        'border-transparent text-white dark:text-neutral-950',
+        // Contraste garantido por auditoria (WCAG AA + APCA Lc>=60) contra
+        // todos os --status-*; o par é o token --status-foreground do theme.css.
+        'border-transparent text-status-foreground',
         statusBgClass[status],
         className
       )}

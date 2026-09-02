@@ -11,6 +11,7 @@ import {
   Megaphone,
   MessageSquare,
   Pause,
+  PencilLine,
   Scale,
   Send,
   Snowflake,
@@ -24,6 +25,11 @@ export const statusOptions: Array<{
   label: string
   icon: LucideIcon
 }> = [
+  {
+    value: 'rascunho',
+    label: 'Rascunho',
+    icon: PencilLine,
+  },
   {
     value: 'aberta',
     label: 'Aberta',

@@ -51,7 +51,7 @@ fontes:
       → toast de confirmação; histórico registra quem/quando (RF16/RF17)
 ```
 
-**⚠ Exceções:** vaga pausada (Suspensa/Congelada) mostra SLA pausado; sem permissão → `/erros/403`.
+**⚠ Exceções:** vaga pausada (Suspensa/Congelada) mostra SLA pausado; sem permissão → `/403`.
 
 ---
 
@@ -62,7 +62,8 @@ fontes:
 
 ```
 [Detalhe /vagas/:id] → ação "Alterar status"
-  → (transição válida? matriz B1: Aberta → {Suspensa, Congelada, Cancelada, Finalizada};
+  → (transição válida? matriz B1: Rascunho → {Aberta, Cancelada};
+     Aberta → {Suspensa, Congelada, Cancelada, Finalizada};
      Suspensa/Congelada → {Aberta, Cancelada}; Finalizada/Cancelada → Arquivada)
       ⚠ transição inválida → opção desabilitada com tooltip explicando
   → Cancelada exige motivo (campo obrigatório no diálogo)
@@ -83,7 +84,7 @@ fontes:
 [Detalhe] → tab "Processo" ou "Jurídico"
   → registra data de encaminhamento ao gestor → timer do gestor inicia (dias úteis)
   → registra data de retorno → timer congela
-  (jurídico: análogo, com nº do chamado; contagem em dias corridos)
+  (jurídico: análogo, com nº do chamado; contagem em dias úteis — revisão set/2026)
 ```
 
 **Invariante:** são **medições**, não SLAs — a UI nunca usa o rótulo "SLA do gestor/jurídico".
@@ -129,7 +130,7 @@ fontes:
 **Gatilho:** reunião de resultados ou cobrança da direção. **RFs:** RF23–RF25, RF26.
 
 ```
-[/indicadores] → KPIs (abertas, % no prazo, tempo médio) + gráficos (funil por etapa,
+[/ (Painel)] → KPIs (abertas, % no prazo, tempo médio) + gráficos (funil por etapa,
   SLA por unidade, volume por período) → filtro de período
   → (precisa do detalhe?) → [/relatorios]
       → filtra por área/gestor/recrutador/status/período → exportar
@@ -152,12 +153,13 @@ fontes:
 ## F9 — Entrar no sistema (todos) — Fase 0
 
 ```
-[/entrar] → credenciais → (ok?) → [Lista de vagas /]
-  ⚠ senha esquecida → [/esqueci-senha] → [/otp]
-  ⚠ sem papel para a rota → /erros/403
+[/sign-in] → credenciais → (ok?) → [Painel /]   (ou a rota de origem, se veio de um link)
+  ⚠ senha esquecida → [/forgot-password]
+  ⚠ sem papel para a rota → /403
 ```
 
 > Auth real está em aberto (decisão B3) — no protótipo, papel simulado via `auth-store`.
+> A etapa de **OTP** prevista na IA não foi implementada: depende do provedor escolhido em B3.
 
 ---
 

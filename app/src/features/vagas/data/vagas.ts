@@ -4,6 +4,7 @@ import {
   ACOES_VAGA,
   vagaSchema,
   type EventoHistorico,
+  type ObservacaoEtapa,
   type StatusVaga,
   type Vaga,
 } from './schema'
@@ -102,6 +103,16 @@ const OBSERVACOES_CONGELADA = [
   'Congelada até assinatura do novo contrato com o cliente.',
 ]
 
+// Observações registradas por etapa (linha do tempo imutável, RF16-adjacente)
+const OBSERVACOES_ETAPAS = [
+  'Gestor pediu prioridade no preenchimento — posição crítica para a Unidade.',
+  'Perfil revisado com o solicitante; requisitos de experiência ajustados.',
+  'Aguardando confirmação de orçamento antes de divulgar.',
+  'Baixa adesão de candidatos até aqui; reforçada a divulgação interna.',
+  'Banca de avaliação confirmada com a coordenação.',
+  'Candidatos finalistas notificados sobre a próxima fase.',
+]
+
 const MOTIVOS_CANCELAMENTO = [
   'Cancelada a pedido do gestor solicitante.',
   'Contenção orçamentária da Unidade.',
@@ -117,9 +128,11 @@ const RECRUTADORAS = Array.from({ length: 5 }, () =>
 
 const GESTORES = Array.from({ length: 12 }, () => faker.person.fullName())
 
-// Distribuição fixa de status: 57 base + 3 reaberturas (abertas) = 60 vagas
+// Distribuição fixa de status: 57 base (3 delas rascunho) + 3 reaberturas
+// (abertas) = 60 vagas
 const DISTRIBUICAO_STATUS: StatusVaga[] = [
-  ...repete('aberta', 23),
+  ...repete('rascunho', 3),
+  ...repete('aberta', 20),
   ...repete('finalizada', 15),
   ...repete('cancelada', 6),
   ...repete('suspensa', 5),
@@ -147,6 +160,8 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
     idxAcao = faker.number.int({ min: 0, max: 2 })
   } else if (terminal) {
     idxAcao = ACOES_VAGA.length - 1 // admissao
+  } else if (status === 'rascunho') {
+    idxAcao = 0 // rascunho ainda não avançou etapa
   } else if (status === 'cancelada') {
     idxAcao = faker.number.int({ min: 0, max: 5 })
   } else if (status === 'suspensa' || status === 'congelada') {
@@ -156,24 +171,70 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
   }
   const acaoAtual = ACOES_VAGA[idxAcao]
 
-  // Janela de recebimento encolhe conforme a vaga avança — mantém todas as
-  // datas dentro de jan–jul/2026
-  const fimJanela =
-    idxAcao >= 8
-      ? '2026-03-31'
-      : idxAcao >= 4
-        ? '2026-04-15'
-        : status === 'cancelada'
-          ? '2026-04-30'
-          : '2026-06-01'
-  const dataRecebimento = origem?.dataEncerramento
-    ? somaDias(origem.dataEncerramento, faker.number.int({ min: 3, max: 12 }))
-    : faker.date.between({ from: '2026-01-05', to: fimJanela })
+  // Janelas de recebimento ("hoje" da demo ≈ set/2026):
+  // - ATIVAS: recentes, calibradas p/ uma leitura plausível do painel
+  //   (~65% dentro da meta de 20 d.ú., ~15% em atenção, ~20% estouradas —
+  //   estouros de semanas, não de meses)
+  // - ENCERRADAS: jan–jun/2026, encolhendo conforme a vaga avançou
+  const ativa =
+    status === 'rascunho' ||
+    status === 'aberta' ||
+    status === 'suspensa' ||
+    status === 'congelada'
 
-  let cursor = somaDias(dataRecebimento, faker.number.int({ min: 0, max: 5 }))
+  let dataRecebimento: Date
+  if (ativa) {
+    const faixa = faker.helpers.weightedArrayElement([
+      { value: 'ok', weight: 13 },
+      { value: 'atencao', weight: 3 },
+      { value: 'estourado', weight: 4 },
+    ] as const)
+    const janelasAtivas = {
+      ok: { from: '2026-08-11', to: '2026-08-28' },
+      atencao: { from: '2026-07-31', to: '2026-08-10' },
+      estourado: { from: '2026-07-06', to: '2026-07-30' },
+    } as const
+    dataRecebimento = faker.date.between(janelasAtivas[faixa])
+  } else {
+    const fimJanela =
+      idxAcao >= 8
+        ? '2026-03-31'
+        : idxAcao >= 4
+          ? '2026-04-15'
+          : status === 'cancelada'
+            ? '2026-04-30'
+            : '2026-06-01'
+    dataRecebimento = faker.date.between({ from: '2026-01-05', to: fimJanela })
+  }
+  // Reabertura: novo registro recente, meses após o encerramento da origem
+  if (origem?.dataEncerramento) {
+    dataRecebimento = faker.date.between({
+      from: '2026-08-05',
+      to: '2026-08-25',
+    })
+  }
+
+  // Nenhuma data do seed passa de "ontem" da demo
+  const HOJE_SEED = new Date('2026-09-01')
+  const limitaHoje = (data: Date): Date => (data > HOJE_SEED ? HOJE_SEED : data)
+
+  let cursor = limitaHoje(
+    somaDias(dataRecebimento, faker.number.int({ min: 0, max: 5 }))
+  )
   const dataAbertura = cursor
+  // % no prazo plausível nos relatórios: ~65% das encerradas percorrem o
+  // processo em ritmo comprimido (fecham dentro dos 20 dias úteis); o resto
+  // estoura de verdade. Sem isso, toda finalizada soma >20 d.ú. e o
+  // Detalhamento mostra 0% em todas as linhas.
+  const ritmoRapido =
+    (terminal || status === 'cancelada') &&
+    faker.datatype.boolean({ probability: 0.65 })
   const avanca = (min: number, max: number): Date => {
-    cursor = somaDias(cursor, faker.number.int({ min, max }))
+    if (ritmoRapido) {
+      min = Math.ceil(min / 2)
+      max = Math.max(min, Math.floor(max * 0.4))
+    }
+    cursor = limitaHoje(somaDias(cursor, faker.number.int({ min, max })))
     return cursor
   }
 
@@ -204,7 +265,7 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
 
   const encerrada = terminal || status === 'cancelada'
   const dataEncerramento = encerrada
-    ? somaDias(cursor, faker.number.int({ min: 0, max: 5 }))
+    ? somaDias(cursor, faker.number.int({ min: 0, max: ritmoRapido ? 1 : 5 }))
     : undefined
 
   // 🔒 Dados sensíveis de candidato só em vagas concluídas
@@ -262,6 +323,19 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
 
   const recrutadora = faker.helpers.arrayElement(RECRUTADORAS)
 
+  // Observações por etapa (~1/4 das vagas que já avançaram alguma etapa)
+  const observacoesEtapas: ObservacaoEtapa[] | undefined =
+    idxAcao >= 1 && faker.datatype.boolean({ probability: 0.25 })
+      ? faker.helpers
+          .arrayElements(OBSERVACOES_ETAPAS, { min: 1, max: 2 })
+          .map((texto) => ({
+            etapa: ACOES_VAGA[faker.number.int({ min: 0, max: idxAcao })],
+            texto,
+            em: faker.date.between({ from: dataAbertura, to: dataAcao }),
+            por: recrutadora,
+          }))
+      : undefined
+
   // Auditoria + histórico mínimo coerente (RF16/RF17): criação + as mudanças
   // de status que explicam a situação atual (Arquivada passa por Finalizada,
   // respeitando a matriz B1)
@@ -279,7 +353,7 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
     status === 'arquivada' ? ['finalizada', 'arquivada'] : [status]
   let statusAnterior: StatusVaga = 'aberta'
   for (const destino of caminhoStatus) {
-    if (destino === 'aberta') break
+    if (destino === 'aberta' || destino === 'rascunho') break
     historico.push({
       em: dataEncerramento ?? dataAcao,
       por: recrutadora,
@@ -317,6 +391,7 @@ function gerarVaga(indice: number, status: StatusVaga, origem?: Vaga): Vaga {
     acaoAtual,
     dataAcao,
     observacoes,
+    observacoesEtapas,
     dataEncaminhamentoGestor,
     dataRetornoGestor,
     chamadoJuridico,

@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ACAO_LABELS, STATUS_LABELS } from '../data/campos'
 import { type Vaga } from '../data/schema'
+import { useVagasStore } from '../data/vagas-store'
 import { gerarCsv, baixarCsv } from '../lib/csv'
 import { podeVerDadosSensiveis, usePapel } from '../lib/papel'
 import { slaDaVaga } from '../lib/sla-vaga'
@@ -19,13 +20,18 @@ function data(d?: Date): string {
 export function ExportarCsv({ table }: { table: Table<Vaga> }) {
   const papel = usePapel()
   const incluirSensiveis = podeVerDadosSensiveis(papel)
+  // Lookup fora do recorte filtrado: a origem de uma reabertura pode não
+  // estar nas linhas exportadas
+  const todas = useVagasStore((s) => s.vagas)
 
   function exportar() {
     const vagas = table.getFilteredRowModel().rows.map((row) => row.original)
+    const codigoPorId = new Map(todas.map((v) => [v.id, v.codigoVaga]))
 
     const cabecalhos = [
       'Chamado',
       'Código',
+      'Código da vaga de origem',
       'Cargo',
       'Função',
       'Unidade',
@@ -41,6 +47,7 @@ export function ExportarCsv({ table }: { table: Table<Vaga> }) {
       'Divulgação do resultado',
       'Candidatos aplicados',
       'Gerou banco',
+      'Observações (etapas)',
       ...(incluirSensiveis
         ? ['Candidato selecionado', 'Gênero', 'Candidato interno']
         : []),
@@ -49,6 +56,9 @@ export function ExportarCsv({ table }: { table: Table<Vaga> }) {
     const linhas = vagas.map((vaga) => [
       vaga.chamado,
       vaga.codigoVaga,
+      vaga.reaberturaDe
+        ? (codigoPorId.get(vaga.reaberturaDe) ?? vaga.reaberturaDe)
+        : '',
       vaga.cargo,
       vaga.funcao,
       vaga.unidade,
@@ -64,6 +74,12 @@ export function ExportarCsv({ table }: { table: Table<Vaga> }) {
       data(vaga.divulgacaoResultado),
       vaga.qtdCandidatosAplicados,
       vaga.gerouBanco === undefined ? '' : vaga.gerouBanco ? 'Sim' : 'Não',
+      (vaga.observacoesEtapas ?? [])
+        .map(
+          (obs) =>
+            `[${ACAO_LABELS[obs.etapa]}] ${obs.texto} (${obs.por}, ${data(obs.em)})`
+        )
+        .join(' | '),
       ...(incluirSensiveis
         ? [
             vaga.candidatoSelecionado,
@@ -81,7 +97,11 @@ export function ExportarCsv({ table }: { table: Table<Vaga> }) {
       `vagas-${format(new Date(), 'yyyy-MM-dd')}.csv`,
       gerarCsv(cabecalhos, linhas)
     )
-    toast.success(`${vagas.length} vaga(s) exportada(s)`)
+    toast.success(
+      vagas.length === 1
+        ? '1 vaga exportada'
+        : `${vagas.length} vagas exportadas`
+    )
   }
 
   return (

@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   Collapsible,
   CollapsibleContent,
@@ -59,19 +60,44 @@ export function NavGroup({ title, items }: NavGroupProps) {
 }
 
 function NavBadge({ children }: { children: ReactNode }) {
-  return <Badge className='rounded-full px-1 py-0 text-xs'>{children}</Badge>
+  return (
+    <Badge className='rounded-full px-1 py-0 text-xs tabular-nums'>
+      {children}
+    </Badge>
+  )
+}
+
+// Trilho do item ativo: um mesmo layoutId em todos os links faz o traço
+// DESLIZAR entre itens ao navegar, em vez de piscar de um para outro.
+// Oculto no modo ícone (sem espaço) e instantâneo com reduced-motion.
+function RailAtivo() {
+  const reduzirMovimento = useReducedMotion()
+  return (
+    <motion.span
+      layoutId='sidebar-rail-ativo'
+      aria-hidden='true'
+      className='absolute inset-y-1.5 start-0 w-0.5 rounded-full bg-primary group-data-[collapsible=icon]:hidden'
+      transition={
+        reduzirMovimento
+          ? { duration: 0 }
+          : { type: 'spring', stiffness: 380, damping: 32 }
+      }
+    />
+  )
 }
 
 function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
   const { setOpenMobile } = useSidebar()
+  const ativo = checkIsActive(href, item)
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        isActive={checkIsActive(href, item)}
-        tooltip={item.title}
-      >
-        <Link to={item.url} onClick={() => setOpenMobile(false)}>
+      <SidebarMenuButton asChild isActive={ativo} tooltip={item.title}>
+        <Link
+          to={item.url}
+          onClick={() => setOpenMobile(false)}
+          className='relative'
+        >
+          {ativo && <RailAtivo />}
           {item.icon && <item.icon />}
           <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
@@ -106,20 +132,25 @@ function SidebarMenuCollapsible({
         </CollapsibleTrigger>
         <CollapsibleContent className='CollapsibleContent'>
           <SidebarMenuSub>
-            {item.items.map((subItem) => (
-              <SidebarMenuSubItem key={subItem.title}>
-                <SidebarMenuSubButton
-                  asChild
-                  isActive={checkIsActive(href, subItem)}
-                >
-                  <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
-                    {subItem.icon && <subItem.icon />}
-                    <span>{subItem.title}</span>
-                    {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
+            {item.items.map((subItem) => {
+              const subAtivo = checkIsActive(href, subItem)
+              return (
+                <SidebarMenuSubItem key={subItem.title}>
+                  <SidebarMenuSubButton asChild isActive={subAtivo}>
+                    <Link
+                      to={subItem.url}
+                      onClick={() => setOpenMobile(false)}
+                      className='relative'
+                    >
+                      {subAtivo && <RailAtivo />}
+                      {subItem.icon && <subItem.icon />}
+                      <span>{subItem.title}</span>
+                      {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )
+            })}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>

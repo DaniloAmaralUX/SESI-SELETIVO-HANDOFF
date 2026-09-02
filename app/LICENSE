@@ -1,21 +1,28 @@
-MIT License
+LICENÇA — a definir com o jurídico antes da entrega formal
 
-Copyright (c) 2024 Sat Naing
+⚠️  Este arquivo continha, até esta revisão, o texto MIT com "Copyright (c) 2024
+    Sat Naing" — herdado do template shadcn-admin, do qual o projeto partiu.
+    Mantê-lo como está declarava o autor do template como titular do sistema de
+    gestão de vagas do SESI/PE, o que não corresponde à realidade.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    O aviso da MIT do template FOI PRESERVADO, como a licença exige, em:
+        licenses/shadcn-admin-MIT.txt
+    e a proveniência de todo o código de terceiros está descrita em:
+        NOTICE.md
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+SITUAÇÃO ATUAL
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    A titularidade e os termos de licenciamento do sistema decorrem do contrato
+    entre a Pitang e o SESI/PE e ainda não foram definidos neste repositório.
+    Até que sejam, considere o código como "todos os direitos reservados" às
+    partes contratantes.
+
+O QUE PRECISA SER DECIDIDO
+
+    1. Quem detém os direitos sobre o sistema (Pitang, SESI/PE ou ambos).
+    2. Sob quais termos ele é licenciado ao cliente.
+    3. Se o Commons Clause que acompanha os componentes de React Bits
+       (ver NOTICE.md, seção 3) é compatível com esses termos — se não for, a
+       remoção é isolada e não afeta nenhuma regra de negócio.
+
+    Ao decidir, substitua este arquivo pelo texto de licença acordado.

@@ -138,6 +138,26 @@ e recebe o `beforeLoad` de guarda (RBAC, decisão B3).
 | `/configuracoes/*` | Preferências do usuário | qualquer logado | 0 |
 | `/erros/*` | Estados de erro | — | 0 |
 
+### 2.1 Rotas especificadas e rotas implementadas
+
+A tabela acima é a **especificação de design**. O MVP implementado divergiu dela em
+alguns caminhos — por decisão de produto ou por convenção do template. Este mapa é a
+verdade para quem for navegar ou integrar; ao mexer nas rotas, atualize-o junto.
+
+| Especificado aqui | Implementado | Situação |
+|---|---|---|
+| `/indicadores` | `/` | O Painel é a página inicial do usuário autenticado. |
+| `/erros/{401,403,404,500,manutencao}` | `/401` `/403` `/404` `/500` `/503` | Sem o prefixo `/erros`; "manutenção" virou `503`. |
+| `/esqueci-senha` | `/forgot-password` | Nome do template, mantido. |
+| `/configuracoes/*` | `/settings`, `/settings/appearance` | Idem. |
+| `/otp` | — | **Não implementado.** Depende do provedor de auth (decisão B3). |
+| `/admin/usuarios` | — | **Não implementado** no MVP (fase 0/2). |
+| `/admin/calendarios` | — | **Não implementado** no MVP (fase 2). Feriados vivem hoje em `lib/feriados.ts` como dado de protótipo. |
+| `/admin/auditoria` | — | **Não implementado** como tela própria. A trilha existe por vaga, no histórico do detalhe. |
+
+As demais rotas (`/sign-in`, `/vagas`, `/vagas/nova`, `/vagas/:id`, `/vagas/:id/editar`,
+`/vagas/importar`, `/relatorios`) foram implementadas com o mesmo caminho da especificação.
+
 ---
 
 ## 6. Inventário de telas
@@ -222,7 +242,7 @@ Resolve a questão em aberto #10: como hierarquizar ~50 campos sem virar formul�
 | **Visão geral** | Identificação, Solicitante, Perfil da vaga, Responsáveis |
 | **Processo** | Status, Ação atual, data da ação, observações + StageStepper detalhado |
 | **SLA & Prazos** | SLA da vaga, contagem, timer gestor, timer jurídico |
-| **Jurídico** | nº chamado jurídico, abertura, parecer, dias corridos |
+| **Jurídico** | nº chamado jurídico, abertura, parecer, dias úteis |
 | **Cronograma** | inscrição, prova, entrevistas, habilitação, admissão |
 | **Resultado** | divulgação, previsão de admissão, candidato selecionado |
 | **Candidato** 🔒 | gênero, interno, banco, qtd. aplicados *(campos sensíveis LGPD — RF26)* |

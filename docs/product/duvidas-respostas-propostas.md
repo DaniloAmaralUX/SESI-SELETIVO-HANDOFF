@@ -20,9 +20,9 @@ RH/Gestora) — o protótipo é o instrumento para **testar** estas premissas co
 
 | Decisão | Escolha |
 |---|---|
-| **Vocabulário do protótipo** (N1/N2) | **Canônico 6×10** — o protótipo apresenta o modelo novo (6 Status × 10 etapas); o teste com usuárias É a validação do de-para. Enums implementados como dado (arrays), remapeáveis sem refactor. |
+| **Vocabulário do protótipo** (N1/N2) | **Canônico 7×10** — o protótipo apresenta o modelo novo (7 Status × 10 etapas; `Rascunho` entrou na revisão de set/2026); o teste com usuárias É a validação do de-para. Enums implementados como dado (arrays), remapeáveis sem refactor. |
 | **Colunas da lista** (dúvida 11a) | **Operacional enxuto (7):** Chamado · Cargo · Unidade/Área · Status (badge) · Ação atual · SLA · Recrutadora. O resto vive em filtros e no detalhe. |
-| **Detalhe da Vaga** (dúvida 11b) | **Tabs por grupo:** header fixo com os 2 eixos + SLA; tabs Visão geral · Processo · Gestor & Jurídico · Resultado & Candidato · Histórico. |
+| **Detalhe da Vaga** (dúvida 11b) | **Tabs por grupo:** header fixo com os 2 eixos + SLA; tabs Visão geral · Processo · Gestor e Jurídico · Resultado e candidato · Observações · Histórico (a de Observações entrou na revisão de set/2026). |
 | **Papéis no protótipo** (dúvida 1-UX) | **Role-switcher visível** — troca entre Recrutadora/Gestora de RH/Admin no próprio protótipo; testa as 3 personas e as restrições LGPD num único deploy. |
 
 ## Respostas lógicas (premissas implementadas)

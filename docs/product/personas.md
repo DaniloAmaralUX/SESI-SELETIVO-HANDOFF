@@ -69,7 +69,7 @@ fontes:
 - Sem visão agregada, os gargalos (gestor lento, jurídico lento, etapa travada) ficam invisíveis.
 
 **O que o sistema deve fazer por ela**
-- Dashboard `/indicadores` com o painel de instrumentos de SLA (elemento-assinatura do design system).
+- Painel de indicadores na página inicial (`/`) com os instrumentos de SLA (elemento-assinatura do design system).
 - Relatórios `/relatorios` com exportação filtrada, respeitando LGPD (RF26 — campos sensíveis por papel).
 - Histórico completo por vaga (RF16/RF17) para auditar decisões.
 
@@ -97,6 +97,10 @@ fontes:
 **O que o sistema deve fazer por ele**
 - `/admin/usuarios`, `/admin/calendarios` e `/admin/auditoria` (IA §6.7), visíveis só ao seu papel.
 - Auditoria somente-leitura com diff das alterações (HoverCard).
+
+> **Estado no MVP:** nenhuma das três telas de administração foi implementada — ver o mapa
+> [Rotas especificadas × implementadas](../design/arquitetura-informacao.md#21-rotas-especificadas-e-rotas-implementadas).
+> A trilha de auditoria por vaga já existe, no histórico da tela de detalhe.
 
 **Frase-síntese:** *"Se der problema, eu preciso conseguir dizer quem fez e quando."*
 

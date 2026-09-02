@@ -26,7 +26,11 @@ export function AcaoStepper({ acaoAtual, dataAcao }: AcaoStepperProps) {
         const Icone = opcao.icon
 
         return (
-          <li key={opcao.value} className='flex gap-3'>
+          <li
+            key={opcao.value}
+            className='flex gap-3'
+            aria-current={atual ? 'step' : undefined}
+          >
             <div className='flex flex-col items-center'>
               <span
                 className={cn(
@@ -36,7 +40,7 @@ export function AcaoStepper({ acaoAtual, dataAcao }: AcaoStepperProps) {
                   atual && 'border-primary text-primary ring-2 ring-primary/30',
                   !concluida && !atual && 'border-border text-muted-foreground'
                 )}
-                aria-current={atual ? 'step' : undefined}
+                aria-hidden='true'
               >
                 {concluida ? (
                   <Check className='size-4' />
@@ -64,6 +68,13 @@ export function AcaoStepper({ acaoAtual, dataAcao }: AcaoStepperProps) {
                 )}
               >
                 {opcao.label}
+                <span className='sr-only'>
+                  {concluida
+                    ? ' — etapa concluída'
+                    : atual
+                      ? ' — etapa atual'
+                      : ' — etapa não iniciada'}
+                </span>
               </p>
               {atual && (
                 <p className='text-xs text-muted-foreground'>

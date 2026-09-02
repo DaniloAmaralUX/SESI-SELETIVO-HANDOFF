@@ -104,7 +104,8 @@ export const CABECALHOS_OPCIONAIS = [
 export function validarLayout(cabecalhos: string[]): string[] {
   const presentes = new Set(cabecalhos.map(normalizar))
   return CABECALHOS_OBRIGATORIOS.filter((c) => !presentes.has(c)).map(
-    (c) => `Coluna obrigatória ausente: "${c}"`
+    (c) =>
+      `Adicione a coluna "${c}" à primeira linha da planilha. Baixe o modelo CSV para ver o layout esperado.`
   )
 }
 
@@ -124,6 +125,18 @@ const TIPOS_CONTRATO: Record<string, Vaga['tipoContrato']> = {
   estagiario: 'estagiario',
   intermitente: 'intermitente',
 }
+
+// Campos obrigatórios por linha → mensagem orientada a solução
+const CAMPOS_OBRIGATORIOS_LINHA: Array<{ coluna: string; mensagem: string }> = [
+  {
+    coluna: 'gestor solicitante',
+    mensagem: 'Gestor solicitante: preencha o campo',
+  },
+  { coluna: 'unidade', mensagem: 'Unidade: preencha o campo' },
+  { coluna: 'area', mensagem: 'Área: preencha o campo' },
+  { coluna: 'cargo', mensagem: 'Cargo: preencha o campo' },
+  { coluna: 'recrutadora', mensagem: 'Recrutadora: preencha o campo' },
+]
 
 function parseData(valor: string): Date | undefined {
   const m = valor.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
@@ -160,28 +173,27 @@ export function mapearLinhas(
     const codigoVaga = col(linha, 'codigo da vaga')
 
     const faltando: string[] = []
-    if (!chamado && !codigoVaga) faltando.push('chamado e/ou código da vaga')
-    for (const campo of [
-      'gestor solicitante',
-      'unidade',
-      'area',
-      'cargo',
-      'recrutadora',
-    ]) {
-      if (!col(linha, campo)) faltando.push(campo)
+    if (!chamado && !codigoVaga)
+      faltando.push('Chamado e código da vaga: preencha ao menos um dos dois')
+    for (const campo of CAMPOS_OBRIGATORIOS_LINHA) {
+      if (!col(linha, campo.coluna)) faltando.push(campo.mensagem)
     }
 
     const tipoContrato =
       TIPOS_CONTRATO[normalizar(col(linha, 'tipo de contrato'))]
-    if (!tipoContrato) faltando.push('tipo de contrato (valor inválido)')
+    if (!tipoContrato)
+      faltando.push(
+        'Tipo de contrato: use determinado, indeterminado, estagiário ou intermitente'
+      )
 
     const dataAbertura = parseData(col(linha, 'data de abertura'))
-    if (!dataAbertura) faltando.push('data de abertura (use dd/mm/aaaa)')
+    if (!dataAbertura)
+      faltando.push('Data de abertura: use o formato dd/mm/aaaa')
 
     if (faltando.length > 0 || !tipoContrato || !dataAbertura) {
       erros.push({
         linha: numeroLinha,
-        mensagem: `Linha ${numeroLinha}: ${faltando.join('; ')}`,
+        mensagem: `Linha ${numeroLinha} — ${faltando.join(' · ')}`,
       })
       return
     }

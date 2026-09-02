@@ -20,18 +20,18 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 const appearanceFormSchema = z.object({
-  theme: z.enum(['light', 'dark']),
-  font: z.enum(fonts),
+  theme: z.enum(['light', 'dark'], { error: 'Escolha um tema.' }),
+  font: z.enum(fonts, { error: 'Escolha uma fonte.' }),
 })
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
 
 export function AppearanceForm() {
   const { font, setFont } = useFont()
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
 
   const defaultValues: Partial<AppearanceFormValues> = {
-    theme: theme as 'light' | 'dark',
+    theme: resolvedTheme,
     font,
   }
 
@@ -94,25 +94,27 @@ export function AppearanceForm() {
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 className='grid max-w-md grid-cols-2 gap-8 pt-2'
+                aria-label='Tema'
               >
                 <FormItem>
-                  <FormLabel className='[&:has([data-state=checked])>div]:border-primary'>
+                  <FormLabel className='[&:has(:focus-visible)>div]:ring-2 [&:has(:focus-visible)>div]:ring-ring [&:has(:focus-visible)>div]:ring-offset-2 [&:has([data-state=checked])>div]:border-primary [&:has([data-state=checked])>span]:font-semibold'>
                     <FormControl>
                       <RadioGroupItem value='light' className='sr-only' />
                     </FormControl>
-                    <div className='items-center rounded-md border-2 border-muted p-1 hover:border-accent'>
-                      <div className='space-y-2 rounded-sm bg-[#ecedef] p-2'>
-                        <div className='space-y-2 rounded-md bg-white p-2 shadow-xs'>
-                          <div className='h-2 w-20 rounded-lg bg-[#ecedef]' />
-                          <div className='h-2 w-25 rounded-lg bg-[#ecedef]' />
+                    {/* Radius concêntrico (better-ui): externo = interno + padding */}
+                    <div className='items-center rounded-2xl border-2 border-muted p-1 hover:border-accent'>
+                      <div className='space-y-2 rounded-lg bg-[oklch(0.946_0.003_264.542)] p-2'>
+                        <div className='space-y-2 rounded-xs bg-[oklch(1_0_0)] p-2 shadow-xs'>
+                          <div className='h-2 w-20 rounded-lg bg-[oklch(0.946_0.003_264.542)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.946_0.003_264.542)]' />
                         </div>
-                        <div className='flex items-center space-x-2 rounded-md bg-white p-2 shadow-xs'>
-                          <div className='h-4 w-4 rounded-full bg-[#ecedef]' />
-                          <div className='h-2 w-25 rounded-lg bg-[#ecedef]' />
+                        <div className='flex items-center space-x-2 rounded-xs bg-[oklch(1_0_0)] p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-[oklch(0.946_0.003_264.542)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.946_0.003_264.542)]' />
                         </div>
-                        <div className='flex items-center space-x-2 rounded-md bg-white p-2 shadow-xs'>
-                          <div className='h-4 w-4 rounded-full bg-[#ecedef]' />
-                          <div className='h-2 w-25 rounded-lg bg-[#ecedef]' />
+                        <div className='flex items-center space-x-2 rounded-xs bg-[oklch(1_0_0)] p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-[oklch(0.946_0.003_264.542)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.946_0.003_264.542)]' />
                         </div>
                       </div>
                     </div>
@@ -122,23 +124,23 @@ export function AppearanceForm() {
                   </FormLabel>
                 </FormItem>
                 <FormItem>
-                  <FormLabel className='[&:has([data-state=checked])>div]:border-primary'>
+                  <FormLabel className='[&:has(:focus-visible)>div]:ring-2 [&:has(:focus-visible)>div]:ring-ring [&:has(:focus-visible)>div]:ring-offset-2 [&:has([data-state=checked])>div]:border-primary [&:has([data-state=checked])>span]:font-semibold'>
                     <FormControl>
                       <RadioGroupItem value='dark' className='sr-only' />
                     </FormControl>
-                    <div className='items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground'>
-                      <div className='space-y-2 rounded-sm bg-slate-950 p-2'>
-                        <div className='space-y-2 rounded-md bg-slate-800 p-2 shadow-xs'>
-                          <div className='h-2 w-20 rounded-lg bg-slate-400' />
-                          <div className='h-2 w-25 rounded-lg bg-slate-400' />
+                    <div className='items-center rounded-2xl border-2 border-muted bg-popover p-1 hover:border-accent'>
+                      <div className='space-y-2 rounded-lg bg-[oklch(0.129_0.042_264.695)] p-2'>
+                        <div className='space-y-2 rounded-xs bg-[oklch(0.279_0.041_260.031)] p-2 shadow-xs'>
+                          <div className='h-2 w-20 rounded-lg bg-[oklch(0.704_0.04_256.788)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.704_0.04_256.788)]' />
                         </div>
-                        <div className='flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-xs'>
-                          <div className='h-4 w-4 rounded-full bg-slate-400' />
-                          <div className='h-2 w-25 rounded-lg bg-slate-400' />
+                        <div className='flex items-center space-x-2 rounded-xs bg-[oklch(0.279_0.041_260.031)] p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-[oklch(0.704_0.04_256.788)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.704_0.04_256.788)]' />
                         </div>
-                        <div className='flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-xs'>
-                          <div className='h-4 w-4 rounded-full bg-slate-400' />
-                          <div className='h-2 w-25 rounded-lg bg-slate-400' />
+                        <div className='flex items-center space-x-2 rounded-xs bg-[oklch(0.279_0.041_260.031)] p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-[oklch(0.704_0.04_256.788)]' />
+                          <div className='h-2 w-25 rounded-lg bg-[oklch(0.704_0.04_256.788)]' />
                         </div>
                       </div>
                     </div>

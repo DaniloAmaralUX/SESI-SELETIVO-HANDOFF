@@ -1,0 +1,33 @@
+# CODEOWNERS — revisão obrigatória por área.
+#
+# O GitHub pede revisão de quem for dono do caminho tocado pelo PR. Para valer
+# como trava, ligue em Settings → Branches → Require review from Code Owners.
+#
+# ⚠️  HANDOFF: ao integrar a dupla de desenvolvimento, adicione os handles do
+#     GitHub nas linhas abaixo. Handle inexistente é ignorado silenciosamente
+#     pelo GitHub — confira em Insights → Community Standards depois de editar.
+
+# Padrão: tudo que não casar com as regras abaixo
+*                       @DaniloAmaralUX
+
+# Domínio e regras de negócio — o núcleo do sistema.
+# Mudança aqui altera SLA, transições de Status ou a trilha de auditoria.
+/app/src/features/vagas/ @DaniloAmaralUX
+
+# Linguagem ubíqua e âncoras de produto: renomear um termo aqui obriga a
+# renomear em todo o código e em todas as telas.
+/CONTEXT.md             @DaniloAmaralUX
+/STRATEGY.md            @DaniloAmaralUX
+/docs/adr/              @DaniloAmaralUX
+
+# Identidade visual e design system
+/app/src/styles/        @DaniloAmaralUX
+/docs/design/           @DaniloAmaralUX
+
+# Licenciamento e proveniência de terceiros — tem pendência jurídica aberta
+/NOTICE.md              @DaniloAmaralUX
+/licenses/              @DaniloAmaralUX
+/app/LICENSE            @DaniloAmaralUX
+
+# Pipeline e configuração de build
+/.github/               @DaniloAmaralUX

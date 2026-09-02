@@ -1,7 +1,7 @@
 ---
 titulo: Revisão do PRD + Mapa de Requisitos/Jornadas + Plano de Reaproveitamento shadcn-admin
 relacionado: PRD-sistema-rh-gestao-vagas.md
-metodo: ce-doc-review (7 personas) + bancada de reaproveitamento (5 agentes) sobre o template shadcn-admin
+metodo: revisão do PRD por múltiplas perspectivas de persona + análise de reaproveitamento do template shadcn-admin
 data: 2026-07-13
 ---
 
@@ -37,7 +37,7 @@ pipeline de importação (parser+dedup+wizard) e RBAC/guard de rota.
 ## A. Achados da revisão (por prioridade)
 
 Legenda: **P0/P1** = resolver antes de planejar · **P2** = resolver no planejamento · **FYI** = advisório.
-Confiança (conf.) na escala ce-doc-review (75 = verificado, impacta execução).
+Confiança (conf.) de 0 a 100 (75 = verificado em fonte primária e com impacto na execução).
 
 ### 🔴 Bloqueadores (cross-persona, conf. 75)
 

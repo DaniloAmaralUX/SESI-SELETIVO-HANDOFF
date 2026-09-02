@@ -18,10 +18,12 @@ describe('ForgotPasswordForm', () => {
 
     screen = await render(<ForgotPasswordForm />)
     emailInput = screen.getByRole('textbox', { name: /^E-mail$/i })
-    continueButton = screen.getByRole('button', { name: /Continuar/i })
+    continueButton = screen.getByRole('button', {
+      name: /Enviar link de redefinição/i,
+    })
   })
 
-  it('renderiza campo de e-mail e botão continuar', async () => {
+  it('renderiza campo de e-mail e botão de envio', async () => {
     await expect.element(emailInput).toBeInTheDocument()
     await expect.element(continueButton).toBeInTheDocument()
   })

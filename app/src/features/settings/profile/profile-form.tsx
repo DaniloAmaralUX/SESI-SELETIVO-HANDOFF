@@ -56,7 +56,11 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder='Seu nome' {...field} />
+                <Input
+                  placeholder='Ex.: Maria Silva'
+                  autoComplete='name'
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Como você aparece nos registros do sistema.
@@ -72,7 +76,13 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel>E-mail</FormLabel>
               <FormControl>
-                <Input placeholder='nome@sesi.org.br' {...field} />
+                <Input
+                  type='email'
+                  inputMode='email'
+                  autoComplete='email'
+                  placeholder='nome@sesi.org.br'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,7 +91,13 @@ export function ProfileForm() {
         <FormItem>
           <FormLabel>Papel</FormLabel>
           <FormControl>
-            <Input value={labelDoPapel(papel)} disabled readOnly />
+            <Input
+              value={labelDoPapel(papel)}
+              readOnly
+              aria-readonly='true'
+              tabIndex={0}
+              className='bg-muted text-muted-foreground'
+            />
           </FormControl>
           <FormDescription>
             Definido pela administração do sistema. No protótipo, use o seletor

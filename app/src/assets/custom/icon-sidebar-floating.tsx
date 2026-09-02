@@ -19,7 +19,7 @@ export function IconSidebarFloating(props: SVGProps<SVGSVGElement>) {
         strokeLinecap='round'
         strokeMiterlimit={10}
       />
-      <g stroke='#fff' strokeLinecap='round' strokeMiterlimit={10}>
+      <g stroke='oklch(1 0 0)' strokeLinecap='round' strokeMiterlimit={10}>
         <path
           fill='none'
           opacity={0.72}
@@ -38,7 +38,13 @@ export function IconSidebarFloating(props: SVGProps<SVGSVGElement>) {
           strokeWidth='2px'
           d='M9.81 21.85L19.18 21.85'
         />
-        <circle cx={11.76} cy={10.88} r={2.54} fill='#fff' opacity={0.8} />
+        <circle
+          cx={11.76}
+          cy={10.88}
+          r={2.54}
+          fill='oklch(1 0 0)'
+          opacity={0.8}
+        />
         <path
           fill='none'
           opacity={0.8}

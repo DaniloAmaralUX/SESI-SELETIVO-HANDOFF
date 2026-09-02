@@ -1,0 +1,1084 @@
+'use client'
+
+import {
+  type CSSProperties,
+  type Dispatch,
+  type KeyboardEvent,
+  type MutableRefObject,
+  type ReactNode,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
+import { Check, ChevronDown } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { createPortal } from 'react-dom'
+import { cn } from '@/lib/utils'
+
+const controlCornerClassName =
+  'rounded-lg supports-[corner-shape:squircle]:corner-squircle supports-[corner-shape:squircle]:rounded-[11px]'
+
+const controlCornerInheritClassName =
+  'rounded-[inherit] supports-[corner-shape:squircle]:[corner-shape:inherit]'
+
+const componentThemeClassName =
+  '[--ic-background:#ffffff] [--ic-foreground:#111111] [--ic-primary:#111111] [--ic-secondary:#646b75] [--ic-surface-border:#e9edf2] [--ic-border:#e3e7ec] [--ic-card:#ffffff] [--ic-card-foreground:#111111] [--ic-muted:#f5f7fa] [--ic-muted-foreground:#6d7480] [--ic-accent:#f3f5f8] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--ic-accent-foreground:#111111] [--ic-input:#e3e7ec] [--ic-ring:rgba(17,17,17,0.16)] [--ic-destructive:#dc2626] [--ic-paper:#fcfcfd] [--ic-popover-foreground:#111111] [--ic-brand:#0ea5e9] [--ic-brand-soft:#bae6fd] [--ic-shadow-soft:0_18px_38px_-24px_rgba(15,23,42,0.35)] [--ic-chart-1:oklch(0.52_0.19_254)] [--ic-chart-2:oklch(0.74_0.11_232)] [--ic-chart-3:oklch(0.42_0.16_262)] [--ic-chart-4:oklch(0.84_0.07_228)] [--ic-chart-5:oklch(0.62_0.14_240)] [--color-background:var(--ic-background)] [--color-foreground:var(--ic-foreground)] [--color-primary:var(--ic-primary)] [--color-secondary:var(--ic-secondary)] [--color-border:var(--ic-border)] [--color-card:var(--ic-card)] [--color-card-foreground:var(--ic-card-foreground)] [--color-muted:var(--ic-muted)] [--color-muted-foreground:var(--ic-muted-foreground)] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--color-input:var(--ic-input)] [--color-ring:var(--ic-ring)] [--color-destructive:var(--ic-destructive)] [--color-paper:var(--ic-paper)] [--color-popover-foreground:var(--ic-popover-foreground)] [--color-brand:var(--ic-brand)] [--color-brand-soft:var(--ic-brand-soft)] [--color-chart-1:var(--ic-chart-1)] [--color-chart-2:var(--ic-chart-2)] [--color-chart-3:var(--ic-chart-3)] [--color-chart-4:var(--ic-chart-4)] [--color-chart-5:var(--ic-chart-5)] dark:[--ic-background:#111111] dark:[--ic-foreground:#f6f3ec] dark:[--ic-primary:#f6f3ec] dark:[--ic-secondary:#cbc6bb] dark:[--ic-surface-border:#2a2a25] dark:[--ic-border:#2b2a25] dark:[--ic-card:#111111] dark:[--ic-card-foreground:#f6f3ec] dark:[--ic-muted:#171716] dark:[--ic-muted-foreground:#9a958a] dark:[--ic-accent:#1a1a18] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] dark:[--ic-accent-foreground:#f6f3ec] dark:[--ic-input:#2b2a25] dark:[--ic-ring:rgba(246,243,236,0.18)] dark:[--ic-destructive:#f87171] dark:[--ic-paper:#171716] dark:[--ic-popover-foreground:#f6f3ec] dark:[--ic-brand:#38bdf8] dark:[--ic-brand-soft:#0c4a6e] dark:[--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] dark:[--ic-chart-1:oklch(0.68_0.17_250)] dark:[--ic-chart-2:oklch(0.82_0.09_225)] dark:[--ic-chart-3:oklch(0.58_0.15_260)] dark:[--ic-chart-4:oklch(0.75_0.12_235)] dark:[--ic-chart-5:oklch(0.88_0.06_220)]'
+
+const MAX_MENU_HEIGHT = 320
+
+const selectListScrollbarClassName =
+  "z-10 my-1.5 mr-0.5 w-1 shrink-0 touch-none select-none opacity-0 transition-opacity duration-150 before:absolute before:left-1/2 before:h-full before:w-5 before:-translate-x-1/2 before:content-[''] data-hovering:pointer-events-auto data-hovering:opacity-100 data-scrolling:pointer-events-auto data-scrolling:opacity-100 data-scrolling:duration-0"
+
+const selectListThumbClassName =
+  'relative rounded-full bg-muted-foreground/50 bg-[color:color-mix(in_oklch,var(--ic-muted-foreground),transparent_35%)]'
+
+const MENU_OFFSET = 8
+const TYPEAHEAD_RESET_MS = 500
+const VIEWPORT_MARGIN = 12
+const SOFT_EASE = [0.22, 1, 0.36, 1] as const
+const EXIT_EASE = [0.55, 0.06, 0.68, 0.19] as const
+const ACTIVE_SPRING = {
+  type: 'spring',
+  stiffness: 460,
+  damping: 34,
+  mass: 0.58,
+} as const
+const CHECK_SPRING = {
+  type: 'spring',
+  stiffness: 520,
+  damping: 28,
+  mass: 0.55,
+} as const
+const PRESS_SPRING = {
+  type: 'spring',
+  stiffness: 560,
+  damping: 32,
+  mass: 0.48,
+} as const
+
+export interface SelectOption {
+  value: string
+  label: string
+  icon?: ReactNode
+  group?: string
+}
+
+export interface SelectProps {
+  options: SelectOption[]
+  value?: string
+  onChange?: (value: string) => void
+  placeholder?: string
+  className?: string
+}
+
+type SelectSection = {
+  items: Array<{
+    index: number
+    option: SelectOption
+  }>
+  key: string
+  label?: string
+}
+
+type MenuPosition = {
+  left: number
+  maxHeight: number
+  top: number
+  transformOrigin: string
+  width: number
+}
+
+type SelectOptionRowProps = {
+  activeHighlightId: string
+  index: number
+  isActive: boolean
+  isSelected: boolean
+  itemVariants: ReturnType<typeof getItemVariants>
+  listboxId: string
+  onSelect: (index: number) => void
+  option: SelectOption
+  setActiveIndex: Dispatch<SetStateAction<number>>
+  setOptionRef: (index: number, node: HTMLDivElement | null) => void
+  setShowActiveHighlight: Dispatch<SetStateAction<boolean>>
+  showActiveHighlight: boolean
+}
+
+type SelectMenuSectionProps = {
+  activeHighlightId: string
+  activeIndex: number
+  itemVariants: ReturnType<typeof getItemVariants>
+  listboxId: string
+  optionRefs: MutableRefObject<Array<HTMLDivElement | null>>
+  section: SelectSection
+  sectionIndex: number
+  selectOption: (index: number, restoreFocus?: boolean) => void
+  setActiveIndex: Dispatch<SetStateAction<number>>
+  setShowActiveHighlight: Dispatch<SetStateAction<boolean>>
+  showActiveHighlight: boolean
+  value?: string
+}
+
+type SelectMenuContentProps = {
+  activeIndex: number
+  closeMenu: (restoreFocus?: boolean) => void
+  itemVariants: ReturnType<typeof getItemVariants>
+  listboxId: string
+  listboxRef: MutableRefObject<HTMLDivElement | null>
+  menuPanelRef: MutableRefObject<HTMLDivElement | null>
+  menuPosition: MenuPosition | null
+  options: SelectOption[]
+  optionRefs: MutableRefObject<Array<HTMLDivElement | null>>
+  panelTransition: {
+    duration: number
+    ease: 'easeOut' | typeof SOFT_EASE
+  }
+  runTypeahead: (key: string) => void
+  sections: SelectSection[]
+  selectOption: (index: number, restoreFocus?: boolean) => void
+  setActiveIndex: Dispatch<SetStateAction<number>>
+  setShowActiveHighlight: Dispatch<SetStateAction<boolean>>
+  showActiveHighlight: boolean
+  triggerId: string
+  value?: string
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function isPrintableKey(
+  event: Pick<
+    KeyboardEvent<HTMLElement>,
+    'altKey' | 'ctrlKey' | 'metaKey' | 'key'
+  >
+) {
+  return (
+    !(event.altKey || event.ctrlKey || event.metaKey) && event.key.length === 1
+  )
+}
+
+function getSelectSections(options: SelectOption[]) {
+  const nextSections: SelectSection[] = []
+
+  options.forEach((option, index) => {
+    const groupLabel = option.group?.trim()
+    const previousSection = nextSections.at(-1)
+
+    if (groupLabel) {
+      if (previousSection?.label === groupLabel) {
+        previousSection.items.push({ index, option })
+        return
+      }
+
+      nextSections.push({
+        items: [{ index, option }],
+        key: `${groupLabel}-${nextSections.length}`,
+        label: groupLabel,
+      })
+      return
+    }
+
+    nextSections.push({
+      items: [{ index, option }],
+      key: `ungrouped-${index}`,
+    })
+  })
+
+  return nextSections
+}
+
+function normalizeTypeaheadValue(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function findTypeaheadMatch(
+  options: SelectOption[],
+  query: string,
+  startIndex: number
+) {
+  const normalizedQuery = normalizeTypeaheadValue(query)
+
+  if (!normalizedQuery) {
+    return -1
+  }
+
+  for (let offset = 1; offset <= options.length; offset += 1) {
+    const index = (startIndex + offset) % options.length
+    const candidate = normalizeTypeaheadValue(options[index]?.label ?? '')
+
+    if (candidate.startsWith(normalizedQuery)) {
+      return index
+    }
+  }
+
+  return -1
+}
+
+function getNextIndex(
+  currentIndex: number,
+  optionCount: number,
+  direction: 1 | -1
+) {
+  if (optionCount === 0) {
+    return 0
+  }
+
+  return (currentIndex + direction + optionCount) % optionCount
+}
+
+function scrollOptionIntoView(
+  container: HTMLDivElement | null,
+  option: HTMLDivElement | null
+) {
+  if (!(container && option)) {
+    return
+  }
+
+  const containerRect = container.getBoundingClientRect()
+  const optionRect = option.getBoundingClientRect()
+
+  if (optionRect.top < containerRect.top) {
+    container.scrollTop -= containerRect.top - optionRect.top
+    return
+  }
+
+  if (optionRect.bottom > containerRect.bottom) {
+    container.scrollTop += optionRect.bottom - containerRect.bottom
+  }
+}
+
+function getItemVariants() {
+  return {
+    exit: (index: number) => ({
+      opacity: 0,
+      y: -2,
+      transition: {
+        delay: Math.min(index, 4) * 0.01,
+        duration: 0.12,
+        ease: EXIT_EASE,
+      },
+    }),
+    hidden: {
+      opacity: 0,
+      y: -4,
+    },
+    visible: (index: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: Math.min(index, 4) * 0.02,
+        duration: 0.18,
+        ease: SOFT_EASE,
+      },
+    }),
+  }
+}
+
+function getMenuPosition({
+  optionCount,
+  panel,
+  triggerRect,
+  viewportHeight,
+  viewportWidth,
+}: {
+  optionCount: number
+  panel: HTMLDivElement | null
+  triggerRect: DOMRect
+  viewportHeight: number
+  viewportWidth: number
+}) {
+  const width = triggerRect.width
+  const availableBelow = Math.max(
+    viewportHeight - triggerRect.bottom - MENU_OFFSET - VIEWPORT_MARGIN,
+    0
+  )
+  const availableAbove = Math.max(
+    triggerRect.top - MENU_OFFSET - VIEWPORT_MARGIN,
+    0
+  )
+  const measuredHeight = Math.max(
+    panel?.scrollHeight ?? 0,
+    panel?.getBoundingClientRect().height ?? 0,
+    Math.min(optionCount * 52, MAX_MENU_HEIGHT)
+  )
+  const preferredHeight = Math.min(
+    measuredHeight || MAX_MENU_HEIGHT,
+    MAX_MENU_HEIGHT
+  )
+  const shouldPlaceAbove =
+    availableBelow < preferredHeight && availableAbove > availableBelow
+  const maxHeight = Math.max(
+    Math.min(
+      MAX_MENU_HEIGHT,
+      shouldPlaceAbove ? availableAbove : availableBelow
+    ),
+    0
+  )
+  const left = clamp(
+    triggerRect.left,
+    VIEWPORT_MARGIN,
+    Math.max(VIEWPORT_MARGIN, viewportWidth - width - VIEWPORT_MARGIN)
+  )
+  const resolvedHeight = Math.min(preferredHeight, maxHeight || preferredHeight)
+  const top = shouldPlaceAbove
+    ? Math.max(VIEWPORT_MARGIN, triggerRect.top - MENU_OFFSET - resolvedHeight)
+    : triggerRect.bottom + MENU_OFFSET
+  const horizontalOrigin =
+    left <= VIEWPORT_MARGIN + 0.5
+      ? 'left'
+      : left >= viewportWidth - width - VIEWPORT_MARGIN - 0.5
+        ? 'right'
+        : 'left'
+
+  return {
+    left,
+    maxHeight,
+    top,
+    transformOrigin: `${horizontalOrigin} ${
+      shouldPlaceAbove ? 'bottom' : 'top'
+    }`,
+    width,
+  }
+}
+
+function handleSelectTriggerKeyDown({
+  closeMenu,
+  event,
+  open,
+  openMenu,
+  optionsLength,
+  pendingTypeaheadRef,
+  selectedIndex,
+}: {
+  closeMenu: (restoreFocus?: boolean) => void
+  event: KeyboardEvent<HTMLButtonElement>
+  open: boolean
+  openMenu: (nextActiveIndex?: number) => void
+  optionsLength: number
+  pendingTypeaheadRef: MutableRefObject<string | null>
+  selectedIndex: number
+}) {
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      openMenu(selectedIndex >= 0 ? selectedIndex : 0)
+      return
+    case 'ArrowUp':
+      event.preventDefault()
+      openMenu(selectedIndex >= 0 ? selectedIndex : optionsLength - 1)
+      return
+    case 'Home':
+      event.preventDefault()
+      openMenu(0)
+      return
+    case 'End':
+      event.preventDefault()
+      openMenu(optionsLength - 1)
+      return
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+
+      if (open) {
+        closeMenu(false)
+        return
+      }
+
+      openMenu(selectedIndex >= 0 ? selectedIndex : 0)
+      return
+    default:
+      if (!isPrintableKey(event)) {
+        return
+      }
+
+      event.preventDefault()
+      pendingTypeaheadRef.current = event.key
+      openMenu(selectedIndex >= 0 ? selectedIndex : 0)
+  }
+}
+
+function handleSelectListboxKeyDown({
+  activeIndex,
+  closeMenu,
+  event,
+  optionCount,
+  runTypeahead,
+  selectOption,
+  setActiveIndex,
+}: {
+  activeIndex: number
+  closeMenu: (restoreFocus?: boolean) => void
+  event: KeyboardEvent<HTMLDivElement>
+  optionCount: number
+  runTypeahead: (key: string) => void
+  selectOption: (index: number, restoreFocus?: boolean) => void
+  setActiveIndex: Dispatch<SetStateAction<number>>
+}) {
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      setActiveIndex((current) => getNextIndex(current, optionCount, 1))
+      return
+    case 'ArrowUp':
+      event.preventDefault()
+      setActiveIndex((current) => getNextIndex(current, optionCount, -1))
+      return
+    case 'Home':
+      event.preventDefault()
+      setActiveIndex(0)
+      return
+    case 'End':
+      event.preventDefault()
+      setActiveIndex(Math.max(optionCount - 1, 0))
+      return
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      selectOption(activeIndex)
+      return
+    case 'Escape':
+      event.preventDefault()
+      closeMenu(true)
+      return
+    case 'Tab':
+      closeMenu(false)
+      return
+    default:
+      if (!isPrintableKey(event)) {
+        return
+      }
+
+      event.preventDefault()
+      runTypeahead(event.key)
+  }
+}
+
+function SelectOptionRow({
+  activeHighlightId,
+  index,
+  isActive,
+  isSelected,
+  itemVariants,
+  listboxId,
+  onSelect,
+  option,
+  setActiveIndex,
+  setOptionRef,
+  setShowActiveHighlight,
+  showActiveHighlight,
+}: SelectOptionRowProps) {
+  return (
+    <motion.div
+      animate='visible'
+      aria-selected={isSelected}
+      className={cn(
+        'group relative isolate flex min-h-11 cursor-pointer touch-manipulation items-center gap-3 px-3 py-2.5 text-sm text-foreground transition-colors outline-none select-none',
+        controlCornerClassName,
+        !isActive && 'hover:bg-accent/60'
+      )}
+      custom={index}
+      exit='exit'
+      id={`${listboxId}-option-${index}`}
+      initial='hidden'
+      onClick={() => onSelect(index)}
+      onMouseDown={(event) => {
+        event.preventDefault()
+      }}
+      onMouseEnter={() => {
+        setActiveIndex(index)
+        setShowActiveHighlight(true)
+      }}
+      ref={(node) => {
+        setOptionRef(index, node)
+      }}
+      role='option'
+      title={option.label}
+      transition={PRESS_SPRING}
+      variants={itemVariants}
+      whileTap={{ scale: 0.96 }}
+    >
+      {showActiveHighlight && isActive ? (
+        <motion.span
+          className={cn(
+            'absolute inset-0 -z-10 bg-accent/70',
+            controlCornerInheritClassName
+          )}
+          layoutId={activeHighlightId}
+          transition={ACTIVE_SPRING}
+        />
+      ) : null}
+      {option.icon ? (
+        <span className='flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground'>
+          {option.icon}
+        </span>
+      ) : null}
+      <span className='min-w-0 flex-1 truncate text-left'>{option.label}</span>
+      <span className='flex h-4 w-4 shrink-0 items-center justify-center'>
+        <AnimatePresence>
+          {isSelected ? (
+            <motion.span
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className='text-primary'
+              exit={{ opacity: 0, scale: 0.8, y: 1 }}
+              initial={{ opacity: 0, scale: 0.8, y: 1 }}
+              transition={CHECK_SPRING}
+            >
+              <Check className='h-4 w-4' />
+            </motion.span>
+          ) : null}
+        </AnimatePresence>
+      </span>
+    </motion.div>
+  )
+}
+
+function SelectMenuSection({
+  activeHighlightId,
+  activeIndex,
+  itemVariants,
+  listboxId,
+  optionRefs,
+  section,
+  sectionIndex,
+  selectOption,
+  setActiveIndex,
+  setShowActiveHighlight,
+  showActiveHighlight,
+  value,
+}: SelectMenuSectionProps) {
+  const groupLabelId = `${listboxId}-group-${sectionIndex}`
+  const sectionItems = section.items.map(({ index, option }) => (
+    <SelectOptionRow
+      activeHighlightId={activeHighlightId}
+      index={index}
+      isActive={index === activeIndex}
+      isSelected={option.value === value}
+      itemVariants={itemVariants}
+      key={option.value}
+      listboxId={listboxId}
+      onSelect={selectOption}
+      option={option}
+      setActiveIndex={setActiveIndex}
+      setOptionRef={(nextIndex, node) => {
+        optionRefs.current[nextIndex] = node
+      }}
+      setShowActiveHighlight={setShowActiveHighlight}
+      showActiveHighlight={showActiveHighlight}
+    />
+  ))
+
+  if (!section.label) {
+    return <div className='space-y-1'>{sectionItems}</div>
+  }
+
+  return (
+    <div className='pt-2 first:pt-0'>
+      <div
+        className='px-3 pb-1.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase'
+        id={groupLabelId}
+      >
+        {section.label}
+      </div>
+      <div className='space-y-1'>{sectionItems}</div>
+    </div>
+  )
+}
+
+function SelectMenuContent({
+  activeIndex,
+  closeMenu,
+  itemVariants,
+  listboxId,
+  listboxRef,
+  menuPanelRef,
+  menuPosition,
+  options,
+  optionRefs,
+  panelTransition,
+  runTypeahead,
+  sections,
+  selectOption,
+  setActiveIndex,
+  setShowActiveHighlight,
+  showActiveHighlight,
+  triggerId,
+  value,
+}: SelectMenuContentProps) {
+  const panelStyle: CSSProperties | undefined = menuPosition
+    ? {
+        left: menuPosition.left,
+        position: 'fixed',
+        top: menuPosition.top,
+        transformOrigin: menuPosition.transformOrigin,
+        width: menuPosition.width,
+      }
+    : undefined
+
+  return (
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        componentThemeClassName,
+        controlCornerClassName,
+        'z-[300] overflow-hidden border border-border bg-card shadow-lg'
+      )}
+      exit={{ opacity: 0, y: -4 }}
+      initial={{ opacity: 0, y: -4 }}
+      key='select-dropdown'
+      ref={menuPanelRef}
+      style={panelStyle}
+      transition={panelTransition}
+    >
+      <ScrollAreaPrimitive.Root
+        className='relative overflow-hidden'
+        style={{
+          maxHeight: menuPosition?.maxHeight ?? MAX_MENU_HEIGHT,
+        }}
+      >
+        <ScrollAreaPrimitive.Viewport className='max-h-[inherit] min-h-0 overscroll-contain outline-none'>
+          <div
+            aria-activedescendant={
+              options[activeIndex]
+                ? `${listboxId}-option-${activeIndex}`
+                : undefined
+            }
+            aria-labelledby={triggerId}
+            aria-orientation='vertical'
+            className='p-1.5 outline-none'
+            id={listboxId}
+            onKeyDown={(event) => {
+              setShowActiveHighlight(true)
+              handleSelectListboxKeyDown({
+                activeIndex,
+                closeMenu,
+                event,
+                optionCount: options.length,
+                runTypeahead,
+                selectOption,
+                setActiveIndex,
+              })
+            }}
+            ref={listboxRef}
+            role='listbox'
+            tabIndex={-1}
+          >
+            {options.length === 0 ? (
+              <div className='px-3 py-3 text-sm text-muted-foreground'>
+                No options available.
+              </div>
+            ) : (
+              sections.map((section, sectionIndex) => (
+                <SelectMenuSection
+                  activeHighlightId={`${listboxId}-active-option`}
+                  activeIndex={activeIndex}
+                  itemVariants={itemVariants}
+                  key={section.key}
+                  listboxId={listboxId}
+                  optionRefs={optionRefs}
+                  section={section}
+                  sectionIndex={sectionIndex}
+                  selectOption={selectOption}
+                  setActiveIndex={setActiveIndex}
+                  setShowActiveHighlight={setShowActiveHighlight}
+                  showActiveHighlight={showActiveHighlight}
+                  value={value}
+                />
+              ))
+            )}
+          </div>
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollAreaPrimitive.Scrollbar
+          className={selectListScrollbarClassName}
+          orientation='vertical'
+        >
+          <ScrollAreaPrimitive.Thumb className={selectListThumbClassName} />
+        </ScrollAreaPrimitive.Scrollbar>
+      </ScrollAreaPrimitive.Root>
+    </motion.div>
+  )
+}
+
+export function Select({
+  options,
+  value,
+  onChange,
+  placeholder = 'Select an option…',
+  className,
+}: SelectProps) {
+  const generatedId = useId()
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [mounted, setMounted] = useState(false)
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
+  const [open, setOpen] = useState(false)
+  const [showActiveHighlight, setShowActiveHighlight] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuPanelRef = useRef<HTMLDivElement>(null)
+  const listboxRef = useRef<HTMLDivElement>(null)
+  const openInteractionRef = useRef<'keyboard' | 'pointer'>('pointer')
+  const optionRefs = useRef<Array<HTMLDivElement | null>>([])
+  const pendingTypeaheadRef = useRef<string | null>(null)
+  const typeaheadRef = useRef('')
+  const typeaheadTimeoutRef = useRef<number | null>(null)
+  const listboxId = `${generatedId}-listbox`
+  const triggerId = `${generatedId}-trigger`
+  const selectedIndex = options.findIndex((option) => option.value === value)
+  const selected = selectedIndex >= 0 ? options[selectedIndex] : undefined
+  const itemVariants = useMemo(() => getItemVariants(), [])
+  const buttonTransition = PRESS_SPRING
+  const panelTransition = { duration: 0.22, ease: SOFT_EASE }
+  const chevronTransition = { duration: 0.2, ease: SOFT_EASE }
+  const sections = useMemo(() => getSelectSections(options), [options])
+
+  const clearTypeahead = useCallback(() => {
+    if (typeaheadTimeoutRef.current !== null) {
+      window.clearTimeout(typeaheadTimeoutRef.current)
+      typeaheadTimeoutRef.current = null
+    }
+
+    typeaheadRef.current = ''
+  }, [])
+
+  const focusTrigger = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      triggerRef.current?.focus({ preventScroll: true })
+    })
+  }, [])
+
+  const updateMenuPosition = useCallback(() => {
+    const trigger = triggerRef.current
+
+    if (!(trigger && typeof window !== 'undefined')) {
+      return
+    }
+
+    const nextPosition = getMenuPosition({
+      optionCount: options.length,
+      panel: menuPanelRef.current,
+      triggerRect: trigger.getBoundingClientRect(),
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
+    })
+
+    setMenuPosition((previous) => {
+      if (
+        previous &&
+        previous.left === nextPosition.left &&
+        previous.maxHeight === nextPosition.maxHeight &&
+        previous.top === nextPosition.top &&
+        previous.transformOrigin === nextPosition.transformOrigin &&
+        previous.width === nextPosition.width
+      ) {
+        return previous
+      }
+
+      return nextPosition
+    })
+  }, [options.length])
+
+  const openMenu = useCallback(
+    (nextActiveIndex = selectedIndex >= 0 ? selectedIndex : 0) => {
+      setActiveIndex(clamp(nextActiveIndex, 0, Math.max(options.length - 1, 0)))
+      setShowActiveHighlight(openInteractionRef.current === 'keyboard')
+      setOpen(true)
+    },
+    [options.length, selectedIndex]
+  )
+
+  const closeMenu = useCallback(
+    (restoreFocus = false) => {
+      setOpen(false)
+      setShowActiveHighlight(false)
+      clearTypeahead()
+      pendingTypeaheadRef.current = null
+
+      if (restoreFocus) {
+        focusTrigger()
+      }
+    },
+    [clearTypeahead, focusTrigger]
+  )
+
+  const selectOption = useCallback(
+    (index: number, restoreFocus = true) => {
+      const option = options[index]
+
+      if (!option) {
+        return
+      }
+
+      onChange?.(option.value)
+      setActiveIndex(index)
+      closeMenu(restoreFocus)
+    },
+    [closeMenu, onChange, options]
+  )
+
+  const runTypeahead = useCallback(
+    (key: string) => {
+      if (options.length === 0) {
+        return
+      }
+
+      const normalizedKey = normalizeTypeaheadValue(key)
+
+      if (!normalizedKey) {
+        return
+      }
+
+      const bufferedQuery = `${typeaheadRef.current}${normalizedKey}`
+      const bufferedMatch = findTypeaheadMatch(
+        options,
+        bufferedQuery,
+        activeIndex
+      )
+      const singleKeyMatch =
+        bufferedMatch === -1
+          ? findTypeaheadMatch(options, normalizedKey, activeIndex)
+          : bufferedMatch
+      const nextIndex = bufferedMatch !== -1 ? bufferedMatch : singleKeyMatch
+
+      typeaheadRef.current =
+        bufferedMatch !== -1 ? bufferedQuery : normalizedKey
+
+      if (typeaheadTimeoutRef.current !== null) {
+        window.clearTimeout(typeaheadTimeoutRef.current)
+      }
+
+      typeaheadTimeoutRef.current = window.setTimeout(() => {
+        typeaheadRef.current = ''
+        typeaheadTimeoutRef.current = null
+      }, TYPEAHEAD_RESET_MS)
+
+      if (nextIndex >= 0) {
+        setActiveIndex(nextIndex)
+        setShowActiveHighlight(true)
+      }
+    },
+    [activeIndex, options]
+  )
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    return () => clearTypeahead()
+  }, [clearTypeahead])
+
+  useLayoutEffect(() => {
+    if (!open) {
+      return
+    }
+
+    updateMenuPosition()
+  }, [open, updateMenuPosition])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    setActiveIndex((current) => {
+      if (selectedIndex >= 0) {
+        return selectedIndex
+      }
+
+      return clamp(current, 0, Math.max(options.length - 1, 0))
+    })
+  }, [open, options.length, selectedIndex])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const handleLayoutChange = () => updateMenuPosition()
+    window.addEventListener('resize', handleLayoutChange)
+    window.addEventListener('scroll', handleLayoutChange, true)
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        window.removeEventListener('resize', handleLayoutChange)
+        window.removeEventListener('scroll', handleLayoutChange, true)
+      }
+    }
+
+    const observer = new ResizeObserver(handleLayoutChange)
+    const observedNodes = [triggerRef.current, menuPanelRef.current].filter(
+      Boolean
+    )
+
+    observedNodes.forEach((node) => {
+      observer.observe(node as Element)
+    })
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', handleLayoutChange)
+      window.removeEventListener('scroll', handleLayoutChange, true)
+    }
+  }, [open, updateMenuPosition])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    if (openInteractionRef.current !== 'keyboard') {
+      return
+    }
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      listboxRef.current?.focus({ preventScroll: true })
+
+      if (pendingTypeaheadRef.current) {
+        runTypeahead(pendingTypeaheadRef.current)
+        pendingTypeaheadRef.current = null
+      }
+    })
+
+    return () => window.cancelAnimationFrame(focusFrame)
+  }, [open, runTypeahead])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    scrollOptionIntoView(
+      listboxRef.current,
+      optionRefs.current[activeIndex] ?? null
+    )
+  }, [activeIndex, open])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target as Node
+
+      if (triggerRef.current?.contains(target)) {
+        return
+      }
+
+      if (menuPanelRef.current?.contains(target)) {
+        return
+      }
+
+      closeMenu(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', handlePointerDown, true)
+  }, [closeMenu, open])
+
+  return (
+    <div
+      className={cn(
+        componentThemeClassName,
+        'relative w-72 max-w-full',
+        className
+      )}
+    >
+      <motion.button
+        aria-controls={open ? listboxId : undefined}
+        aria-expanded={open}
+        aria-haspopup='listbox'
+        className={cn(
+          'flex min-h-11 w-full touch-manipulation items-center justify-between gap-2 border border-border bg-card px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          controlCornerClassName
+        )}
+        data-state={open ? 'open' : 'closed'}
+        id={triggerId}
+        onClick={() => {
+          if (open) {
+            closeMenu(false)
+            return
+          }
+
+          openInteractionRef.current = 'pointer'
+          openMenu(selectedIndex >= 0 ? selectedIndex : 0)
+        }}
+        onKeyDown={(event) => {
+          openInteractionRef.current = 'keyboard'
+          handleSelectTriggerKeyDown({
+            closeMenu,
+            event,
+            open,
+            openMenu,
+            optionsLength: options.length,
+            pendingTypeaheadRef,
+            selectedIndex,
+          })
+        }}
+        ref={triggerRef}
+        transition={buttonTransition}
+        type='button'
+        whileTap={{ scale: 0.96 }}
+      >
+        <span
+          className={cn(
+            'min-w-0 flex-1 truncate',
+            selected ? 'text-foreground' : 'text-muted-foreground'
+          )}
+          title={selected ? selected.label : placeholder}
+        >
+          {selected ? selected.label : placeholder}
+        </span>
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          className='shrink-0'
+          transition={chevronTransition}
+        >
+          <ChevronDown className='h-4 w-4 text-muted-foreground' />
+        </motion.span>
+      </motion.button>
+
+      {mounted
+        ? createPortal(
+            <AnimatePresence>
+              {open ? (
+                <SelectMenuContent
+                  activeIndex={activeIndex}
+                  closeMenu={closeMenu}
+                  itemVariants={itemVariants}
+                  listboxId={listboxId}
+                  listboxRef={listboxRef}
+                  menuPanelRef={menuPanelRef}
+                  menuPosition={menuPosition}
+                  optionRefs={optionRefs}
+                  options={options}
+                  panelTransition={panelTransition}
+                  runTypeahead={runTypeahead}
+                  sections={sections}
+                  selectOption={selectOption}
+                  setActiveIndex={setActiveIndex}
+                  setShowActiveHighlight={setShowActiveHighlight}
+                  showActiveHighlight={showActiveHighlight}
+                  triggerId={triggerId}
+                  value={value}
+                />
+              ) : null}
+            </AnimatePresence>,
+            document.body
+          )
+        : null}
+    </div>
+  )
+}
+
+export { Select as select }

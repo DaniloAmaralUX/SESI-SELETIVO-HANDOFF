@@ -66,6 +66,14 @@ type DataTableProps<TData> = {
   emptyMessage?: React.ReactNode
   // Colunas ocultas por padrão (ex.: colunas que só alimentam filtros)
   initialColumnVisibility?: VisibilityState
+  // Ordenação inicial (ex.: SLA desc — o mais crítico no topo)
+  initialSorting?: SortingState
+  // Classes extras da <Table> (ex.: min-w maior p/ tabelas largas)
+  tableClassName?: string
+  // Visão alternativa <md (ex.: lista de cards). Quando presente, a tabela
+  // fica max-md:hidden e esta render prop assume — toolbar, contador e
+  // paginação continuam compartilhados
+  mobileView?: (table: TanstackTable<TData>) => React.ReactNode
 }
 
 /**
@@ -84,10 +92,13 @@ export function DataTable<TData>({
   toolbarActions,
   emptyMessage = 'Nenhum resultado.',
   initialColumnVisibility = {},
+  initialSorting = [],
+  tableClassName,
+  mobileView,
 }: DataTableProps<TData>) {
   // Estados locais de UI (não sincronizados com a URL)
   const [rowSelection, setRowSelection] = useState({})
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(initialSorting)
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility
   )
@@ -136,6 +147,8 @@ export function DataTable<TData>({
     ensurePageInRange(pageCount)
   }, [pageCount, ensurePageInRange])
 
+  const totalFiltrado = table.getFilteredRowModel().rows.length
+
   // Ignora interações vindas de células marcadas com data-no-row-click
   // (checkbox de seleção, menu de ações etc.)
   const handleRowInteraction = (event: React.MouseEvent, rowData: TData) => {
@@ -165,8 +178,22 @@ export function DataTable<TData>({
           }
         />
       )}
-      <div className='overflow-hidden rounded-md border'>
-        <Table className='min-w-xl'>
+      {toolbar && (
+        <p role='status' className='text-sm text-muted-foreground'>
+          {totalFiltrado === 1
+            ? '1 registro encontrado'
+            : `${totalFiltrado} registros encontrados`}
+        </p>
+      )}
+      {mobileView && <div className='md:hidden'>{mobileView(table)}</div>}
+      <div
+        className={cn(
+          // Moldura por sombra-anel, não borda (better-ui)
+          'overflow-hidden rounded-md shadow-(--shadow-border)',
+          mobileView && 'max-md:hidden'
+        )}
+      >
+        <Table className={cn('min-w-xl', tableClassName)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -175,6 +202,15 @@ export function DataTable<TData>({
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
+                      aria-sort={
+                        header.column.getIsSorted() === 'asc'
+                          ? 'ascending'
+                          : header.column.getIsSorted() === 'desc'
+                            ? 'descending'
+                            : header.column.getCanSort()
+                              ? 'none'
+                              : undefined
+                      }
                       className={cn(
                         header.column.columnDef.meta?.className,
                         header.column.columnDef.meta?.thClassName
@@ -225,7 +261,7 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleFlatColumns().length}
                   className='h-24 text-center'
                 >
                   {emptyMessage}
