@@ -30,7 +30,14 @@ export function CommandMenu() {
   )
 
   return (
-    <CommandDialog modal open={open} onOpenChange={setOpen}>
+    <CommandDialog
+      modal
+      open={open}
+      onOpenChange={setOpen}
+      // Título/descrição sr-only do preset vêm em inglês — PT aqui
+      title='Menu de comando'
+      description='Busque um comando ou navegue pelo sistema'
+    >
       {/* O CommandDialog do preset não inclui o root do cmdk — envolver aqui */}
       <Command>
         <CommandInput placeholder='Digite um comando ou busque...' />

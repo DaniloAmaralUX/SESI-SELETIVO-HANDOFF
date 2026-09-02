@@ -16,8 +16,7 @@ export function SignIn() {
             Entrar
           </h1>
           <p className='text-sm text-pretty text-muted-foreground'>
-            Informe seu e-mail e senha para acessar o sistema de gestão de
-            vagas.
+            Informe seu e-mail para acessar o sistema de gestão de vagas.
           </p>
         </div>
         <div className='stagger-item'>

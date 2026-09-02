@@ -109,7 +109,8 @@ export function AtencaoList({ atencao }: AtencaoListProps) {
             asChild
             className='active:scale-[0.98]'
           >
-            <Link to='/vagas'>Ver todas as vagas que precisam de atenção</Link>
+            {/* Rótulo curto: o longo estourava o rail estreito em ~1024px */}
+            <Link to='/vagas'>Ver todas as vagas</Link>
           </Button>
         </CardFooter>
       )}

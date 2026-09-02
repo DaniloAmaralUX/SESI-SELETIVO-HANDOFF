@@ -41,10 +41,12 @@ export function PipelineChart({ porAcao }: PipelineChartProps) {
           Onde estão as vagas ativas, da solicitação à admissão
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className='overflow-x-auto'>
+        {/* 10 etapas não cabem em larguras médias — o card rolava cortado;
+            scroll próprio com largura mínima preserva a leitura do fluxo */}
         <ol
           aria-label='Pipeline por etapa, da solicitação à admissão'
-          className='flex items-end gap-1 border-b sm:gap-1.5'
+          className='flex min-w-2xl items-end gap-1 border-b sm:gap-1.5'
         >
           {porAcao.map((item) => {
             const ehGargalo = item.acao === gargalo

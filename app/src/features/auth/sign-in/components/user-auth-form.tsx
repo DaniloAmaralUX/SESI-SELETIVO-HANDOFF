@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -18,8 +18,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/iconiq/spinner'
-import { PasswordInput } from '@/components/password-input'
 
+// Protótipo SEM SENHA (decisão de demo): o e-mail identifica quem entra e o
+// acesso é liberado direto — auth real (B3) fica para o backend. Por isso
+// também não há "Esqueceu a senha".
 const formSchema = z.object({
   email: z.email({
     error: (iss) =>
@@ -27,8 +29,6 @@ const formSchema = z.object({
         ? 'Informe seu e-mail.'
         : 'Use um e-mail válido, como nome@sesi.org.br.',
   }),
-  // Comprimento de senha é política de cadastro/redefinição, não de login
-  password: z.string().min(1, 'Informe sua senha.'),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -48,7 +48,6 @@ export function UserAuthForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   })
 
@@ -111,31 +110,6 @@ export function UserAuthForm({
                   spellCheck={false}
                   autoCapitalize='none'
                   placeholder='nome@sesi.org.br'
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='password'
-          render={({ field }) => (
-            <FormItem>
-              <div className='flex items-center justify-between gap-2'>
-                <FormLabel>Senha</FormLabel>
-                <Link
-                  to='/forgot-password'
-                  className='-my-1 py-1 text-sm font-medium text-muted-foreground transition-opacity hover:opacity-75'
-                >
-                  Esqueceu a senha?
-                </Link>
-              </div>
-              <FormControl>
-                <PasswordInput
-                  autoComplete='current-password'
-                  placeholder='********'
                   {...field}
                 />
               </FormControl>
