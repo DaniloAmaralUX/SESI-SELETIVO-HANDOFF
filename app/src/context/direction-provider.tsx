@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { DirectionProvider as RdxDirProvider } from '@radix-ui/react-direction'
+// Mesmo módulo dos ui/* (radix-ui unificado): o provider do pacote individual
+// cria OUTRO contexto de direção, que os componentes unificados não leem
+import { Direction as RdxDirection } from 'radix-ui'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 export type Direction = 'ltr' | 'rtl'
@@ -46,7 +48,7 @@ export function DirectionProvider({ children }: { children: React.ReactNode }) {
         resetDir,
       }}
     >
-      <RdxDirProvider dir={dir}>{children}</RdxDirProvider>
+      <RdxDirection.Provider dir={dir}>{children}</RdxDirection.Provider>
     </DirectionContext>
   )
 }

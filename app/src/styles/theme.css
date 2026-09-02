@@ -39,17 +39,33 @@
   --sidebar-ring: oklch(0.785 0.164 77.6); /* foco âmbar no rail escuro */
 
   /* Status da Vaga — fundo de badge; no tema claro usar texto branco (AA >= 4.5:1) */
+  --status-rascunho: oklch(0.53 0.09 295); /* violeta neutro — em preparação */
   --status-aberta: oklch(0.55 0.145 250); /* azul SESI */
   --status-suspensa: oklch(0.52 0.11 70); /* âmbar */
   --status-congelada: oklch(0.52 0.085 220); /* ciano frio */
   --status-cancelada: oklch(0.55 0.19 25); /* vermelho */
-  --status-finalizada: oklch(0.52 0.14 150); /* verde */
+  --status-finalizada: oklch(0.5 0.13 136); /* verde SESI (hue do í da logo) */
   --status-arquivada: oklch(0.5 0.02 260); /* cinza neutro */
 
+  /* Verde gráfico EXATO do SVG oficial (#65BC45) — só para marca/acentos,
+     nunca como texto (contraste de texto usa --sla-ok) */
+  --verde-sesi: oklch(0.716 0.177 138.3);
+
   /* SLA (meta 20 dias úteis, ADR 0002) — mesma regra de texto dos status */
-  --sla-ok: oklch(0.52 0.14 150); /* verde */
+  --sla-ok: oklch(0.5 0.13 136); /* verde SESI */
   --sla-atencao: oklch(0.52 0.11 70); /* âmbar */
   --sla-estourado: oklch(0.55 0.19 25); /* vermelho */
+
+  /* Texto sobre os fundos --status-* (auditado WCAG AA + APCA Lc>=60) */
+  --status-foreground: oklch(1 0 0);
+
+  /* Profundidade de superfície (better-ui): anel 1px + lift + ambiente */
+  --shadow-border:
+    0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06),
+    0 2px 4px 0 oklch(0 0 0 / 0.04);
+  --shadow-border-hover:
+    0 0 0 1px oklch(0 0 0 / 0.08), 0 1px 2px -1px oklch(0 0 0 / 0.08),
+    0 2px 4px 0 oklch(0 0 0 / 0.06);
 }
 
 .dark {
@@ -59,21 +75,24 @@
   --card-foreground: oklch(0.965 0.008 257);
   --popover: oklch(0.205 0.025 257);
   --popover-foreground: oklch(0.965 0.008 257);
-  --primary: oklch(
-    0.64 0.15 257
-  ); /* azul SESI clareado p/ contraste no escuro */
+  /* Azul SESI clareado p/ contraste no escuro. L 0.765 garante APCA Lc>=60
+     nos dois papéis: como fundo com texto escuro E como texto sobre o bg
+     (fundos médios têm teto de Lc ~43); C clampado ao gamut sRGB. */
+  --primary: oklch(0.765 0.115 257);
   --primary-foreground: oklch(0.17 0.02 257);
   --secondary: oklch(0.27 0.03 257);
   --secondary-foreground: oklch(0.965 0.008 257);
   --muted: oklch(0.27 0.03 257);
-  --muted-foreground: oklch(0.72 0.02 255);
+  --muted-foreground: oklch(0.77 0.02 255); /* APCA Lc>=60 sobre bg e card */
   --accent: oklch(0.3 0.04 257);
   --accent-foreground: oklch(0.965 0.008 257);
-  --destructive: oklch(0.63 0.19 27.7);
+  /* Vermelho como texto de erro sobre bg escuro (Lc>=60); botões usam
+     dark:bg-destructive/60, cujo blend mantém texto branco AA (auditado) */
+  --destructive: oklch(0.78 0.124 25);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.64 0.15 257);
-  --chart-1: oklch(0.64 0.15 257); /* azul SESI */
+  --ring: oklch(0.765 0.115 257);
+  --chart-1: oklch(0.765 0.115 257); /* azul SESI */
   --chart-2: oklch(0.8 0.16 78); /* âmbar */
   --chart-3: oklch(0.72 0.15 152); /* verde */
   --chart-4: oklch(0.55 0.1 257); /* azul médio */
@@ -82,25 +101,37 @@
   /* Rail no escuro: azul-profundo levemente rebaixado p/ assentar sobre o fundo */
   --sidebar: oklch(0.21 0.035 257);
   --sidebar-foreground: oklch(0.95 0.012 257);
-  --sidebar-primary: oklch(0.64 0.15 257);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.765 0.115 257);
+  --sidebar-primary-foreground: oklch(0.17 0.02 257);
   --sidebar-accent: oklch(0.3 0.05 257);
   --sidebar-accent-foreground: oklch(0.98 0.006 257);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.8 0.16 78);
 
-  /* Status da Vaga — mesma matiz do tema claro, mais claros; usar texto escuro (AA >= 4.5:1) */
-  --status-aberta: oklch(0.72 0.14 250); /* azul SESI */
+  /* Status da Vaga — mesma matiz do tema claro, mais claros; texto escuro
+     (WCAG AA + APCA Lc>=60 auditados; C clampado ao gamut sRGB onde preciso) */
+  --status-rascunho: oklch(0.77 0.085 295); /* violeta neutro */
+  --status-aberta: oklch(0.75 0.129 250); /* azul SESI */
   --status-suspensa: oklch(0.8 0.14 80); /* âmbar */
   --status-congelada: oklch(0.78 0.12 220); /* ciano frio */
-  --status-cancelada: oklch(0.7 0.17 25); /* vermelho */
-  --status-finalizada: oklch(0.76 0.16 150); /* verde */
-  --status-arquivada: oklch(0.72 0.02 260); /* cinza neutro */
+  --status-cancelada: oklch(0.765 0.135 25); /* vermelho */
+  --status-finalizada: oklch(0.78 0.17 136); /* verde SESI (hue do í da logo) */
+  --status-arquivada: oklch(0.755 0.02 260); /* cinza neutro */
 
-  /* SLA (meta 20 dias úteis, ADR 0002) — mesma regra de texto dos status */
-  --sla-ok: oklch(0.76 0.16 150); /* verde */
+  /* Verde gráfico oficial — igual ao claro (uso de marca, não texto) */
+  --verde-sesi: oklch(0.716 0.177 138.3);
+
+  /* SLA (meta 20 dias úteis, ADR 0002) — como TEXTO sobre bg escuro (Lc>=60) */
+  --sla-ok: oklch(0.78 0.17 136); /* verde SESI */
   --sla-atencao: oklch(0.8 0.14 80); /* âmbar */
-  --sla-estourado: oklch(0.7 0.17 25); /* vermelho */
+  --sla-estourado: oklch(0.78 0.124 25); /* vermelho */
+
+  /* Texto sobre os fundos --status-* no escuro: neutro puro, sem tinta */
+  --status-foreground: oklch(0.145 0 0);
+
+  /* No escuro, sombras em camadas não aparecem — anel branco único (better-ui) */
+  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
+  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
 }
 
 @theme inline {
@@ -110,6 +141,10 @@
   --font-plex: 'IBM Plex Sans', 'sans-serif';
   --font-archivo: 'Archivo', 'sans-serif';
   --font-mono: 'IBM Plex Mono', 'monospace';
+  /* opção 'system' do FontProvider (classe font-system) */
+  --font-system:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -148,13 +183,16 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* habilita bg-status-aberta, text-sla-estourado etc. */
+  --color-status-rascunho: var(--status-rascunho);
   --color-status-aberta: var(--status-aberta);
   --color-status-suspensa: var(--status-suspensa);
   --color-status-congelada: var(--status-congelada);
   --color-status-cancelada: var(--status-cancelada);
   --color-status-finalizada: var(--status-finalizada);
   --color-status-arquivada: var(--status-arquivada);
+  --color-verde-sesi: var(--verde-sesi);
   --color-sla-ok: var(--sla-ok);
   --color-sla-atencao: var(--sla-atencao);
   --color-sla-estourado: var(--sla-estourado);
+  --color-status-foreground: var(--status-foreground);
 }
