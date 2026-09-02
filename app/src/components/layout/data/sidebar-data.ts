@@ -36,7 +36,7 @@ export const sidebarData: SidebarData = {
       title: 'Indicadores',
       items: [
         {
-          title: 'Dashboard',
+          title: 'Painel',
           url: '/',
           icon: LayoutDashboard,
         },

@@ -59,7 +59,7 @@ CONTEXT.md ──────────────► linguagem ubíqua (font
 
 | ADR | Decisão | Status |
 |---|---|---|
-| [adr/0001-status-e-acao-como-eixos-independentes.md](adr/0001-status-e-acao-como-eixos-independentes.md) | Status (6 valores) e Ação atual (10 etapas) modelados como **dois eixos independentes**; nunca misturados. | Aceita |
+| [adr/0001-status-e-acao-como-eixos-independentes.md](adr/0001-status-e-acao-como-eixos-independentes.md) | Status (7 valores) e Ação atual (10 etapas) modelados como **dois eixos independentes**; nunca misturados. | Aceita |
 | [adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md](adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md) | SLA em **dias úteis** por um **motor próprio** alimentado por tabela de feriados configurável por Unidade. | Aceita |
 
 ## Soluções — aprendizados de execução

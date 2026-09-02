@@ -44,12 +44,16 @@ export function contagemPorAcao(
   }))
 }
 
-// Contagem por Unidade, ordenada do maior para o menor.
+// Contagem por Unidade das vagas ATIVAS, ordenada do maior para o menor.
+// Ativas (e não todas) para o card falar do mesmo recorte que o resto do painel
+// operacional: o herói de SLA, a fila de atenção e o pipeline também olham só
+// para o que está em andamento. Incluir rascunho/arquivada aqui misturaria
+// volume histórico com carga de trabalho atual na mesma leitura.
 export function contagemPorUnidade(
   vagas: Vaga[]
 ): Array<{ unidade: string; total: number }> {
   const mapa = new Map<string, number>()
-  for (const vaga of vagas) {
+  for (const vaga of vagasAtivas(vagas)) {
     mapa.set(vaga.unidade, (mapa.get(vaga.unidade) ?? 0) + 1)
   }
   return [...mapa.entries()]

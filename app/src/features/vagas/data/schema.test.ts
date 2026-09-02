@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   ACOES_VAGA,
+  OBSERVACAO_MAX_CHARS,
   STATUS_VAGA,
+  observacaoEtapaSchema,
   vagaCreateSchema,
   vagaSchema,
   type Vaga,
@@ -138,9 +140,38 @@ describe('mock de vagas', () => {
   })
 })
 
+describe('observacaoEtapaSchema', () => {
+  const base = {
+    etapa: 'inscricoes',
+    em: new Date('2026-07-10'),
+    por: 'Recrutadora Teste',
+  }
+
+  it('aceita texto até o limite de caracteres', () => {
+    const ok = observacaoEtapaSchema.safeParse({
+      ...base,
+      texto: 'a'.repeat(OBSERVACAO_MAX_CHARS),
+    })
+    expect(ok.success).toBe(true)
+  })
+
+  it('rejeita texto vazio e acima do limite', () => {
+    expect(
+      observacaoEtapaSchema.safeParse({ ...base, texto: '' }).success
+    ).toBe(false)
+    expect(
+      observacaoEtapaSchema.safeParse({
+        ...base,
+        texto: 'a'.repeat(OBSERVACAO_MAX_CHARS + 1),
+      }).success
+    ).toBe(false)
+  })
+})
+
 describe('enums do domínio', () => {
-  it('STATUS_VAGA tem 6 status', () => {
-    expect(STATUS_VAGA).toHaveLength(6)
+  it('STATUS_VAGA tem 7 status, com rascunho primeiro', () => {
+    expect(STATUS_VAGA).toHaveLength(7)
+    expect(STATUS_VAGA[0]).toBe('rascunho')
   })
 
   it('ACOES_VAGA tem 10 ações na ordem canônica', () => {

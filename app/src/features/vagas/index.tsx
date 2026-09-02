@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -26,17 +26,27 @@ export function Vagas() {
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
         <div className='flex flex-wrap items-center justify-between gap-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Vagas</h2>
+            <h1 className='text-2xl font-bold tracking-tight'>Vagas</h1>
             <p className='text-muted-foreground'>
               Acompanhe as vagas e o andamento dos processos seletivos
             </p>
           </div>
-          <Button asChild>
-            <Link to='/vagas/nova'>
-              <Plus className='size-4' />
-              Nova vaga
-            </Link>
-          </Button>
+          <div className='flex items-center gap-2'>
+            {/* Fluxo de lote sempre à vista — antes só existia na sidebar e
+                no empty state (invisível com a lista cheia) */}
+            <Button variant='outline' asChild>
+              <Link to='/vagas/importar'>
+                <Upload className='size-4' />
+                Importar planilha
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to='/vagas/nova'>
+                <Plus className='size-4' />
+                Nova vaga
+              </Link>
+            </Button>
+          </div>
         </div>
         <VagasTable data={vagas} />
       </Main>

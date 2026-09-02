@@ -53,7 +53,7 @@ export function PapelSwitcher() {
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' size='sm' className='scale-95 gap-1.5'>
               <UserCog className='size-[1.2rem]' />
-              <span className='max-sm:sr-only'>{papelAtual?.label}</span>
+              <span className='max-lg:sr-only'>{papelAtual?.label}</span>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>

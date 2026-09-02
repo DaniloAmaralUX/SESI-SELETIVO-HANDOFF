@@ -20,7 +20,10 @@ parou.
 
 Modelar **dois eixos separados** em toda a stack (dados, filtros, UI):
 
-- **Status** — 6 valores (Aberta, Suspensa, Congelada, Cancelada, Finalizada, Arquivada). Governa o SLA.
+- **Status** — 7 valores (Rascunho, Aberta, Suspensa, Congelada, Cancelada, Finalizada, Arquivada). Governa o SLA.
+  *Rascunho foi acrescentado na revisão com a cliente em set/2026; a versão original desta ADR previa 6 valores,*
+  *começando em Aberta. O relógio do SLA só passa a correr em Rascunho → Aberta — ver*
+  *[contrato de API](../engineering/contrato-api.md) e [CONTEXT.md](../../CONTEXT.md).*
 - **Ação atual** — 10 etapas ordenadas (Solicitação recebida → … → Admissão).
 
 Na UI, Status vira badge colorido e Ação atual vira coluna/stepper; nunca são fundidos num só controle.

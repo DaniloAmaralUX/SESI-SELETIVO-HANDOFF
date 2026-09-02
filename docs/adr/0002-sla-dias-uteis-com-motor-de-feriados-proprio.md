@@ -23,7 +23,7 @@ serviço/biblioteca externa de feriados.
 Distinções de contagem fixadas na linguagem (ver [CONTEXT.md](../../CONTEXT.md)):
 
 - **SLA** (Vaga) e **Tempo do gestor** correm em **dias úteis**.
-- **Tempo do jurídico** corre em **dias corridos**.
+- **Tempo do jurídico** corre em **dias úteis** (revisado com a cliente em set/2026; a versão original desta ADR previa dias corridos).
 - O SLA **pausa** nos Status Suspensa e Congelada.
 
 ## Consequências

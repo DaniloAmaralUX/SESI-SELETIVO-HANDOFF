@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ptBR } from 'date-fns/locale'
@@ -81,7 +81,6 @@ export function ImportarVagas() {
 
   const [passo, setPasso] = useState(0)
   const [analise, setAnalise] = useState<Analise | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   const novas = analise?.linhas.filter((l) => !l.duplicada) ?? []
   const duplicadas = analise?.linhas.filter((l) => l.duplicada) ?? []
@@ -137,9 +136,13 @@ export function ImportarVagas() {
       labelDoPapel(papel)
     )
     toast.success(
-      `${criadas.length} vaga(s) importada(s)` +
+      (criadas.length === 1
+        ? '1 vaga importada'
+        : `${criadas.length} vagas importadas`) +
         (duplicadas.length > 0
-          ? ` · ${duplicadas.length} duplicada(s) ignorada(s)`
+          ? duplicadas.length === 1
+            ? ' · 1 duplicada ignorada'
+            : ` · ${duplicadas.length} duplicadas ignoradas`
           : '')
     )
     navigate({ to: '/vagas' })
@@ -199,15 +202,20 @@ export function ImportarVagas() {
                 </EmptyHeader>
                 <div className='flex flex-wrap justify-center gap-2'>
                   <input
-                    ref={inputRef}
+                    id='arquivo-csv'
                     type='file'
                     accept='.csv,text/csv'
-                    className='sr-only'
+                    className='peer sr-only'
                     onChange={(e) => aoEscolherArquivo(e.target.files?.[0])}
                   />
-                  <Button onClick={() => inputRef.current?.click()}>
-                    <FileUp className='size-4' />
-                    Escolher arquivo
+                  <Button
+                    asChild
+                    className='peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50'
+                  >
+                    <label htmlFor='arquivo-csv'>
+                      <FileUp className='size-4' />
+                      Escolher arquivo
+                    </label>
                   </Button>
                   <Button variant='outline' onClick={baixarModelo}>
                     <Download className='size-4' />
@@ -229,7 +237,7 @@ export function ImportarVagas() {
               {analise.errosLayout.length > 0 ? (
                 <Alert variant='destructive'>
                   <TriangleAlert />
-                  <AlertTitle>Layout inválido (RF20)</AlertTitle>
+                  <AlertTitle>Layout do arquivo não reconhecido</AlertTitle>
                   <AlertDescription>
                     <ul className='list-disc ps-4'>
                       {analise.errosLayout.map((erro) => (
@@ -243,8 +251,9 @@ export function ImportarVagas() {
                   <CheckCircle2 />
                   <AlertTitle>Layout reconhecido</AlertTitle>
                   <AlertDescription>
-                    {analise.linhas.length + analise.errosLinhas.length}{' '}
-                    linha(s) de dados encontradas.
+                    {analise.linhas.length + analise.errosLinhas.length === 1
+                      ? '1 linha de dados encontrada.'
+                      : `${analise.linhas.length + analise.errosLinhas.length} linhas de dados encontradas.`}
                   </AlertDescription>
                 </Alert>
               )}
@@ -253,8 +262,9 @@ export function ImportarVagas() {
                 <Alert variant='destructive'>
                   <TriangleAlert />
                   <AlertTitle>
-                    {analise.errosLinhas.length} linha(s) com erro serão
-                    ignoradas
+                    {analise.errosLinhas.length === 1
+                      ? '1 linha com erro será ignorada'
+                      : `${analise.errosLinhas.length} linhas com erro serão ignoradas`}
                   </AlertTitle>
                   <AlertDescription>
                     <ul className='list-disc ps-4'>
@@ -263,7 +273,9 @@ export function ImportarVagas() {
                       ))}
                       {analise.errosLinhas.length > 8 && (
                         <li>
-                          +{analise.errosLinhas.length - 8} outro(s) erro(s)
+                          {analise.errosLinhas.length - 8 === 1
+                            ? '+1 outro erro'
+                            : `+${analise.errosLinhas.length - 8} outros erros`}
                         </li>
                       )}
                     </ul>
@@ -291,10 +303,10 @@ export function ImportarVagas() {
         {passo === 2 && analise && (
           <Card>
             <CardHeader>
-              <CardTitle>Prévia da importação (RF22)</CardTitle>
+              <CardTitle>Prévia da importação</CardTitle>
               <CardDescription>
-                Revise antes de gravar. Duplicadas por nº do chamado ou código
-                (RF21) não serão importadas.
+                Revise antes de gravar. Vagas com nº de chamado ou código já
+                cadastrados não serão importadas.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -365,7 +377,7 @@ export function ImportarVagas() {
               <CardTitle>Confirmar importação</CardTitle>
               <CardDescription>
                 A gravação registra a origem e o evento de importação no
-                histórico de cada vaga (RF16/RF17).
+                histórico de cada vaga.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -390,7 +402,8 @@ export function ImportarVagas() {
                   onClick={confirmarImportacao}
                 >
                   <Check className='size-4' />
-                  Importar {novas.length} vaga(s)
+                  Importar{' '}
+                  {novas.length === 1 ? '1 vaga' : `${novas.length} vagas`}
                 </Button>
               </div>
             </CardContent>
@@ -413,12 +426,19 @@ function Resumo({ titulo, valor }: { titulo: string; valor: number }) {
 // Stepper horizontal do wizard — mesmo idioma visual do AcaoStepper
 function StepperWizard({ passoAtual }: { passoAtual: number }) {
   return (
-    <ol className='flex flex-wrap items-center gap-2'>
+    <ol
+      aria-label='Etapas da importação'
+      className='flex flex-wrap items-center gap-2'
+    >
       {PASSOS.map((passo, indice) => {
         const concluido = indice < passoAtual
         const atual = indice === passoAtual
         return (
-          <li key={passo} className='flex items-center gap-2'>
+          <li
+            key={passo}
+            aria-current={atual ? 'step' : undefined}
+            className='flex items-center gap-2'
+          >
             <span
               className={cn(
                 'flex size-7 items-center justify-center rounded-full border text-xs font-medium',
@@ -427,11 +447,16 @@ function StepperWizard({ passoAtual }: { passoAtual: number }) {
                 atual && 'border-primary text-primary ring-2 ring-primary/30',
                 !concluido && !atual && 'border-border text-muted-foreground'
               )}
-              aria-current={atual ? 'step' : undefined}
+              aria-hidden='true'
             >
               {concluido ? <Check className='size-3.5' /> : indice + 1}
             </span>
+            <span className='sr-only'>
+              {`Passo ${indice + 1} de ${PASSOS.length}, ${passo}` +
+                (concluido ? ', concluído' : atual ? ', em andamento' : '')}
+            </span>
             <span
+              aria-hidden='true'
               className={cn(
                 'text-sm',
                 atual

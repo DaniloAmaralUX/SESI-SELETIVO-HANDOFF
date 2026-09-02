@@ -5,21 +5,25 @@ export function ForbiddenError() {
   const navigate = useNavigate()
   const { history } = useRouter()
   return (
-    <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <h1 className='text-[7rem] leading-tight font-bold'>403</h1>
-        <span className='font-medium'>Access Forbidden</span>
+    <main className='min-h-svh'>
+      <div className='m-auto flex min-h-svh w-full flex-col items-center justify-center gap-2'>
+        <p aria-hidden='true' className='text-[7rem] leading-tight font-bold'>
+          403
+        </p>
+        <h1 className='text-xl font-medium'>Você não tem acesso a esta área</h1>
         <p className='text-center text-muted-foreground'>
-          You don't have necessary permission <br />
-          to view this resource.
+          Este recurso é restrito a outro papel. <br />
+          Fale com a administração se precisar de acesso.
         </p>
         <div className='mt-6 flex gap-4'>
           <Button variant='outline' onClick={() => history.go(-1)}>
-            Go Back
+            Voltar
           </Button>
-          <Button onClick={() => navigate({ to: '/' })}>Back to Home</Button>
+          <Button onClick={() => navigate({ to: '/' })}>
+            Ir para o início
+          </Button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

@@ -25,10 +25,11 @@ Aberta pode estar em qualquer etapa; o Status diz a *situação*, a Ação atual
 
 ### Status (situação da Vaga)
 
-Controla o **cronômetro de SLA**. Seis valores:
+Controla o **cronômetro de SLA**. Sete valores:
 
 | Status | Significado | Efeito no SLA |
 |---|---|---|
+| **Rascunho** | Em preparação; processo ainda não iniciado | **não conta (ainda)** |
 | **Aberta** | Processo em andamento | conta |
 | **Suspensa** | Pausada por decisão do RH/gestor | **pausa** |
 | **Congelada** | Pausada por bloqueio externo | **pausa** |
@@ -37,8 +38,9 @@ Controla o **cronômetro de SLA**. Seis valores:
 | **Arquivada** | Fora da operação; preserva histórico (estado pós-terminal) | não conta |
 
 **Matriz de transições (B1)** — nem todo Status vai para qualquer outro. Regra vigente (dado remapeável,
-não hard-coded): Aberta → {Suspensa, Congelada, Cancelada, Finalizada}; Suspensa/Congelada → {Aberta,
-Cancelada}; Finalizada/Cancelada → Arquivada; Arquivada é terminal. Cancelar exige **motivo**.
+não hard-coded): Rascunho → {Aberta, Cancelada}; Aberta → {Suspensa, Congelada, Cancelada, Finalizada};
+Suspensa/Congelada → {Aberta, Cancelada}; Finalizada/Cancelada → Arquivada; Arquivada é terminal. Cancelar
+exige **motivo**.
 
 ### Ação atual (etapa no processo seletivo)
 
@@ -63,19 +65,21 @@ Onde a Vaga está no fluxo. Dez etapas **ordenadas**:
 
 O ponto de maior confusão histórica; a linguagem aqui é deliberadamente estrita.
 
-**SLA** — pertence **exclusivamente à Vaga**. Tem **meta de 20 dias úteis**. Começa na abertura da Vaga e
-encerra na **Divulgação do resultado** (quando congela no valor final). Pausa nos Status **Suspensa** e
-**Congelada**. É o único prazo com "meta". → visualizado pelo painel/indicador de SLA.
+**SLA** — pertence **exclusivamente à Vaga**. Tem **meta de 20 dias úteis**. Passa a contar quando a Vaga
+entra em andamento (**Rascunho → Aberta**; em Rascunho não corre) e encerra na **Divulgação do resultado**
+(quando congela no valor final). Pausa nos Status **Suspensa** e **Congelada**. É o único prazo com "meta".
+→ visualizado pelo painel/indicador de SLA.
 
 **Tempo do gestor** — **duração medida** entre o encaminhamento ao gestor e o retorno dele, em **dias úteis**.
 É uma medição, **não** um SLA (não tem meta). Nunca chamar de "SLA do gestor".
 
 **Tempo do jurídico** — **duração medida** entre a abertura do chamado jurídico e o recebimento do parecer,
-em **dias corridos**. É uma medição, **não** um SLA. Nunca chamar de "SLA do jurídico".
+em **dias úteis** (regra revisada com a cliente em set/2026; antes media em dias corridos). É uma medição,
+**não** um SLA. Nunca chamar de "SLA do jurídico".
 
-**Dia útil** — dia que conta para o SLA e para o Tempo do gestor. Exclui sábados/domingos, feriados nacionais
-(inclusive móveis: Carnaval, Sexta-feira Santa, Corpus Christi) e os **feriados próprios da Unidade**. (O
-Tempo do jurídico, por contraste, corre em dias **corridos**.)
+**Dia útil** — dia que conta para o SLA e para as medições (Tempo do gestor e Tempo do jurídico). Exclui
+sábados/domingos, feriados nacionais (inclusive móveis: Carnaval, Sexta-feira Santa, Corpus Christi) e os
+**feriados próprios da Unidade**.
 
 ---
 

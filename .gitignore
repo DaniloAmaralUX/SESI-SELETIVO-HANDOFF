@@ -38,5 +38,13 @@ Thumbs.db
 !.vscode/settings.json
 *.sw?
 
-# Ferramentas de agente/IA locais (não versionadas)
+# Ferramentas e configurações locais de assistente (não versionadas)
 .claude/
+.agents/
+
+# Scratch: scripts e saídas temporários de investigação/evidência.
+# Prefixe com ponto e "tmp" (ex.: .shots-tmp.mjs) para nunca virar commit.
+*-tmp.*
+*.tmp
+.scratch/
+screenshots/

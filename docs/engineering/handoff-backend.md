@@ -24,7 +24,7 @@ Não redesenhe o modelo nem as regras: **porte-os**. Fontes no código (todas te
 |---|---|
 | [`app/src/features/vagas/data/schema.ts`](../../app/src/features/vagas/data/schema.ts) | Entidade **Vaga** (todos os campos), enums canônicos, schemas de criar/editar (Zod). **Fonte única do modelo de dados.** |
 | [`app/src/features/vagas/data/transicoes.ts`](../../app/src/features/vagas/data/transicoes.ts) | Matriz de transições de Status (B1) — como **dado**, não hard-code. |
-| [`app/src/features/vagas/data/vagas-store.ts`](../../app/src/features/vagas/data/vagas-store.ts) | Semântica exata das 5 operações de escrita (criar, atualizar, mudarStatus, mudarAcao, importar): o que o servidor gera, carimba e registra em cada uma. |
+| [`app/src/features/vagas/data/vagas-store.ts`](../../app/src/features/vagas/data/vagas-store.ts) | Semântica exata das 6 operações de escrita (criar, atualizar, mudarStatus, mudarAcao, adicionarObservacao, importar): o que o servidor gera, carimba e registra em cada uma. |
 | [`app/src/features/vagas/lib/sla.ts`](../../app/src/features/vagas/lib/sla.ts) | Motor de SLA em dias úteis (portar para o servidor — ver §SLA). |
 | [`app/src/features/vagas/lib/feriados.ts`](../../app/src/features/vagas/lib/feriados.ts) | Motor de feriados próprio: nacionais (fixos + móveis por Páscoa/Butcher), estadual PE e municipais por Unidade. |
 | [`app/src/features/vagas/lib/papel.ts`](../../app/src/features/vagas/lib/papel.ts) | Papéis e a regra B7 (dados sensíveis só para Admin). |
@@ -37,20 +37,27 @@ O shape canônico é o `vagaSchema` — **toda resposta da API deve passar em `v
 - **Identificação**: `id` (gerado), `chamado` (nº do chamado), `codigoVaga`, `origemDoCadastro` (`manual`/`importacao`), `fonteDosDados`.
 - **Classificação**: `unidade`, `area`, `cargo`, `nivel` (I–VI), `funcao`, `tipoContrato` (`determinado`/`indeterminado`/`estagiario`/`intermitente`), `pcd`, `motivoContratacao`.
 - **Pessoas (dados, não usuários)**: `gestorSolicitante`, `recrutadora`.
-- **Dois eixos**: `status` (6 valores) + `acaoAtual` (10 etapas ordenadas) + `dataAcao`.
+- **Dois eixos**: `status` (7 valores, começando em `rascunho`) + `acaoAtual` (10 etapas ordenadas) + `dataAcao`.
+  A vaga **nasce em `rascunho`** e o relógio do SLA só começa em `rascunho → aberta`, transição em que
+  `dataAbertura`/`dataAcao` são re-carimbadas. `rascunho → cancelada` **não** re-carimba nada — ver
+  [contrato de API](contrato-api.md#ciclo-de-vida-do-status).
 - **Fluxo gestor/jurídico**: `dataEncaminhamentoGestor`, `dataRetornoGestor`, `chamadoJuridico`, `aberturaChamadoJuridico`, `recebimentoParecerJuridico`.
 - **Cronograma (RF13)**: `inscricoesInicio/Fim`, `dataProva`, `dataEntrevistaRh`, `dataEntrevistaGestor`, `dataHabilitacao`, `divulgacaoResultado`, `previsaoAdmissao`, `dataAdmissao`.
 - 🔒 **Resultado/candidato (LGPD, B7)**: `candidatoSelecionado`, `genero`, `candidatoInterno` — sensíveis; `gerouBanco`, `qtdCandidatosAplicados` — agregados, não sensíveis.
 - **Encerramento/reabertura**: `dataEncerramento`, `motivoCancelamento`, `reaberturaDe` (reabertura = **novo registro** vinculado ao anterior — semântica final pendente, ver §Decisões em aberto).
 - **Auditoria (RF17)**: `criadoEm/Por`, `atualizadoEm/Por` — carimbados pelo servidor.
-- **Histórico (RF16)**: trilha **imutável** de eventos `{ em, por, tipo, descricao }`, com `tipo` ∈ `criacao | edicao | mudanca-status | mudanca-acao | importacao`. Recomendação de modelagem: tabela própria append-only, nunca editável por endpoint.
+- **Observações por etapa**: `observacoesEtapas` — coleção **append-only** de `{ etapa, texto, em, por }`,
+  `texto` de 1 a 500 caracteres (validar no servidor). Sem edição nem remoção; cada registro também gera
+  um evento `observacao` no histórico. Modelar como tabela própria ligada à Vaga.
+- **Histórico (RF16)**: trilha **imutável** de eventos `{ em, por, tipo, descricao }`, com `tipo` ∈ `criacao | edicao | mudanca-status | mudanca-acao | importacao | observacao`. Recomendação de modelagem: tabela própria append-only, nunca editável por endpoint.
 
 **Não há campo de SLA persistido** — ver §SLA.
 
 ## Endpoints e erros
 
 Estão especificados em [contrato-api.md](contrato-api.md): `GET/POST /vagas`, `GET/PATCH /vagas/:id`,
-`POST /vagas/:id/status`, `POST /vagas/:id/acao`, `POST /vagas/importar`, com query params de
+`POST /vagas/:id/status`, `POST /vagas/:id/acao`, `POST /vagas/:id/observacoes`,
+`POST /vagas/importar`, com query params de
 listagem/paginação, envelope `{ data, page, pageSize, total }` e formato de erro
 `{ error: { code, message, details } }` (400/401/403/404/409/500).
 
@@ -60,8 +67,9 @@ listagem/paginação, envelope `{ data, page, pageSize, total }` e formato de er
    Mudar um não altera o outro.
 2. **Matriz de transições B1**: transição de `status` fora da matriz → `409`. A matriz é **dado
    configurável** (o PRD marca "a confirmar"), não constante de código:
-   `aberta → suspensa|congelada|cancelada|finalizada`; `suspensa|congelada → aberta|cancelada`;
-   `finalizada|cancelada → arquivada`; `arquivada` é terminal.
+   `rascunho → aberta|cancelada`; `aberta → suspensa|congelada|cancelada|finalizada`;
+   `suspensa|congelada → aberta|cancelada`; `finalizada|cancelada → arquivada`;
+   `arquivada` é terminal. Nada volta para `rascunho`.
 3. **Motivo obrigatório ao cancelar**: `status = cancelada` sem `motivoCancelamento` → `400`.
 4. **Sem exclusão física** (PRD §8): não existe `DELETE`. Encerramento = cancelar/finalizar (o
    servidor carimba `dataEncerramento`) e depois arquivar.
@@ -78,10 +86,23 @@ listagem/paginação, envelope `{ data, page, pageSize, total }` e formato de er
    código: responda criadas × ignoradas; duplicidade em criação manual → `409`.
 9. **Semântica da criação** (B5, replicar `criar()` do store): servidor gera `id`; exige `chamado`
    e/ou `codigoVaga` (gera código no padrão `VG-AAAA-NNN` se vazio); `dataRecebimento` vazia recebe
-   fallback `dataAbertura`; a vaga **nasce** `status = aberta`, `acaoAtual = solicitacao-recebida`,
+   fallback `dataAbertura`; a vaga **nasce** `status = rascunho`, `acaoAtual = solicitacao-recebida`,
    `dataAcao = dataAbertura`; `origemDoCadastro` conforme o canal; auditoria + evento `criacao`.
 10. **Mudança de status que encerra** (`cancelada`/`finalizada`): servidor carimba
     `dataEncerramento = agora`.
+11. **Início do SLA no Rascunho**: em `rascunho → aberta` — e **somente** nessa transição — o servidor
+    re-carimba `dataAbertura` e `dataAcao` com o instante da transição. **`rascunho → cancelada` não
+    re-carimba nada**: preserva a `dataAbertura` digitada, que é o dado histórico da recrutadora.
+    Aplicar o re-carimbo nas duas saídas é o erro fácil de cometer — há teste cobrindo em
+    `data/vagas-store.test.ts`. Enquanto `rascunho`, o SLA vale `0` e a vaga fica fora dos agregados.
+12. **Observações são append-only**: `POST /vagas/:id/observacoes` só acrescenta. Sem `PATCH`/`DELETE`.
+    Validar `texto` entre 1 e 500 caracteres **no servidor** (o limite do campo na tela é
+    conveniência, não garantia) e anexar o evento `observacao` ao histórico. Vaga `arquivada` não
+    recebe novas observações; as existentes são preservadas.
+13. **Exportações**: se o servidor gerar CSV/XLSX, neutralizar **injeção de fórmula** — célula
+    iniciada por `=`, `+`, `-`, `@`, TAB ou CR é executada como fórmula por Excel/Sheets, e as
+    observações são texto livre. O front resolve em `features/vagas/lib/csv.ts` (prefixo de aspa
+    simples, preservando valores numéricos).
 
 ## SLA — especificação de cálculo (portar `lib/sla.ts`)
 
@@ -96,7 +117,8 @@ listagem/paginação, envelope `{ data, page, pageSize, total }` e formato de er
 - **Severidade**: `estourado` ≥ 20 d.ú. · `atencao` ≥ 15 · `ok` < 15.
 - **Tempo do gestor**: `dataEncaminhamentoGestor → dataRetornoGestor`, em dias **úteis**.
   **Tempo do jurídico**: `aberturaChamadoJuridico → recebimentoParecerJuridico`, em dias
-  **corridos**.
+  **úteis** (revisado com a cliente em set/2026; a versão anterior media em dias corridos — ver
+  nota na [ADR 0002](../adr/0002-sla-dias-uteis-com-motor-de-feriados-proprio.md)).
 - ⚠️ **Melhoria esperada no backend**: a pausa em Suspensa/Congelada usa a `dataAcao` como
   aproximação no protótipo. Como o histórico registra as mudanças de status com timestamp, o
   servidor pode (e deve) **descontar os períodos exatos de pausa**.
@@ -127,6 +149,9 @@ O provedor de auth **não está decidido** (reunião de arquitetura com o TI). O
 
 - [ ] Toda resposta de Vaga passa em `vagaSchema.parse` no front (datas ISO 8601).
 - [ ] Transição fora da matriz B1 → `409`; cancelar sem motivo → `400`.
+- [ ] Vaga criada nasce em `rascunho`; `rascunho → aberta` re-carimba `dataAbertura`/`dataAcao` e
+      `rascunho → cancelada` **não** re-carimba.
+- [ ] Observações append-only, limite de 500 caracteres validado no servidor, evento no histórico.
 - [ ] Nenhuma rota de exclusão física; encerrar carimba `dataEncerramento`.
 - [ ] Histórico append-only gravado exclusivamente pelo servidor, com `por` derivado do token.
 - [ ] Campos sensíveis (B7) filtrados na serialização e nas exportações para papéis ≠ `admin`.

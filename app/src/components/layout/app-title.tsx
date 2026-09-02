@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
+import { SesiWordmark } from '@/assets/logo'
 import { cn } from '@/lib/utils'
 import {
   SidebarMenu,
@@ -23,10 +24,14 @@ export function AppTitle() {
             <Link
               to='/'
               onClick={() => setOpenMobile(false)}
-              className='grid flex-1 text-start text-sm leading-tight'
+              className='grid flex-1 gap-0.5 text-start text-sm leading-tight'
             >
-              <span className='truncate font-bold'>SESI</span>
-              <span className='truncate text-xs'>Processo Seletivo</span>
+              {/* SVG largo e baixo (117:43) — precisa de corpo maior que
+                  texto para ter presença de marca */}
+              <SesiWordmark className='text-2xl' />
+              <span className='truncate text-xs text-muted-foreground'>
+                Processo Seletivo
+              </span>
             </Link>
             <ToggleSidebar />
           </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
+import NumberFlow from '@number-flow/react'
 import { BarChart3, Download } from 'lucide-react'
-import { Bar, BarChart, XAxis, YAxis } from 'recharts'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,13 +12,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart'
-import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -28,14 +23,21 @@ import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { DatePicker } from '@/components/date-picker'
+// Tabs do iconiq (r-tabs): indicador animado — mesma família do detalhe
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/iconiq/r-tabs'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { PapelSwitcher } from '@/components/papel-switcher'
@@ -46,7 +48,9 @@ import { STATUS_LABELS } from '@/features/vagas/data/campos'
 import { type StatusVaga } from '@/features/vagas/data/schema'
 import { useVagas } from '@/features/vagas/data/vagas-store'
 import { gerarCsv, baixarCsv } from '@/features/vagas/lib/csv'
+import { SLA_META_DIAS_UTEIS } from '@/features/vagas/lib/sla'
 import { slaDaVaga } from '@/features/vagas/lib/sla-vaga'
+import { RankingDimensao } from './components/ranking-dimensao'
 import {
   DIMENSAO_LABELS,
   DIMENSOES,
@@ -56,11 +60,7 @@ import {
 } from './lib/relatorios'
 
 // Relatórios analíticos (RF24/RF25): recorte por dimensão + período, com
-// tabela agregada, gráfico e exportação CSV. Agregações puras em lib/.
-
-const chartConfig = {
-  total: { label: 'Vagas', color: 'var(--primary)' },
-} satisfies ChartConfig
+// tabela agregada, ranking de barras e exportação CSV. Agregações em lib/.
 
 export function Relatorios() {
   const vagas = useVagas()
@@ -76,6 +76,9 @@ export function Relatorios() {
         : undefined
     return agregarRelatorio(recorte, dimensao, slaDaVaga, rotuloDe)
   }, [vagas, dimensao, de, ate])
+
+  // Soma geral para o rótulo de participação `total (share%)` das barras
+  const somaTotal = linhas.reduce((soma, linha) => soma + linha.total, 0)
 
   function exportar() {
     const csv = gerarCsv(
@@ -133,41 +136,59 @@ export function Relatorios() {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recorte</CardTitle>
-            <CardDescription>
-              Dimensão de agrupamento e período pela data de abertura
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='flex flex-wrap items-end gap-4'>
-            <div className='flex flex-col gap-2'>
-              <Label>Agrupar por</Label>
-              <ToggleGroup
-                type='single'
-                variant='outline'
-                value={dimensao}
-                onValueChange={(valor) =>
-                  valor && setDimensao(valor as Dimensao)
-                }
+        {/* Filtros como linha quieta em GRID: coluna flexível para as abas
+            (min-w-0 → scroll interno) + coluna fixa para o período. Sem card:
+            hierarquia por espaço, não por molduras (interface-design) */}
+        <div className='stagger-item grid items-end gap-x-8 gap-y-3 lg:grid-cols-[minmax(0,1fr)_auto]'>
+          <div className='flex min-w-0 flex-col gap-2'>
+            <Label id='agrupar-por-label'>Agrupar por</Label>
+            {/* r-tabs: o indicador animado desliza entre as dimensões.
+                [&>.mt-10]:hidden esconde a ÁREA DE CONTEÚDO do componente
+                (os stubs abaixo existem só para resolver a aba ativa) —
+                sem isso ela vira 40px de gap fantasma sob as abas */}
+            <Tabs
+              value={dimensao}
+              onValueChange={(valor) => valor && setDimensao(valor as Dimensao)}
+              className='[&>.mt-10]:hidden'
+            >
+              <TabsList
+                aria-labelledby='agrupar-por-label'
+                className='max-w-full justify-start overflow-x-auto p-1'
               >
                 {DIMENSOES.map((d) => (
-                  <ToggleGroupItem key={d} value={d}>
+                  <TabsTrigger key={d} value={d} className='px-4 py-2'>
                     {DIMENSAO_LABELS[d]}
-                  </ToggleGroupItem>
+                  </TabsTrigger>
                 ))}
-              </ToggleGroup>
+              </TabsList>
+              {DIMENSOES.map((d) => (
+                <TabsContent key={d} value={d} className='hidden' />
+              ))}
+            </Tabs>
+          </div>
+          <div className='flex flex-wrap items-end gap-x-4 gap-y-3'>
+            <div className='flex flex-col gap-2'>
+              <Label id='periodo-de-label'>De</Label>
+              <DatePicker
+                id='periodo-de'
+                aria-labelledby='periodo-de-label periodo-de'
+                selected={de}
+                onSelect={setDe}
+                limpavel
+              />
             </div>
             <div className='flex flex-col gap-2'>
-              <Label>De</Label>
-              <DatePicker selected={de} onSelect={setDe} limpavel />
+              <Label id='periodo-ate-label'>Até</Label>
+              <DatePicker
+                id='periodo-ate'
+                aria-labelledby='periodo-ate-label periodo-ate'
+                selected={ate}
+                onSelect={setAte}
+                limpavel
+              />
             </div>
-            <div className='flex flex-col gap-2'>
-              <Label>Até</Label>
-              <DatePicker selected={ate} onSelect={setAte} limpavel />
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {linhas.length === 0 ? (
           <Empty>
@@ -175,68 +196,87 @@ export function Relatorios() {
               <EmptyMedia variant='icon'>
                 <BarChart3 />
               </EmptyMedia>
-              <EmptyTitle>Nenhuma vaga no recorte</EmptyTitle>
+              <EmptyTitle>Nenhuma vaga no período</EmptyTitle>
+              {/* Desc não repete o título: diz o porquê + como resolver */}
               <EmptyDescription>
-                Ajuste o período ou limpe as datas para ver os dados.
+                Nenhuma vaga foi aberta entre as datas selecionadas. Ajuste ou
+                limpe o período para ver os recortes.
               </EmptyDescription>
             </EmptyHeader>
+            <EmptyContent>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  setDe(undefined)
+                  setAte(undefined)
+                }}
+              >
+                Limpar período
+              </Button>
+            </EmptyContent>
           </Empty>
         ) : (
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
-            <Card>
+            <Card className='stagger-item shadow-(--shadow-border) transition-shadow duration-200 ease-out hover:shadow-(--shadow-border-hover)'>
               <CardHeader>
-                <CardTitle>Vagas por {DIMENSAO_LABELS[dimensao]}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={chartConfig}
-                  className='max-h-90 w-full'
-                >
-                  <BarChart
-                    layout='vertical'
-                    accessibilityLayer
-                    data={linhas}
-                    margin={{ left: 8, right: 16 }}
-                  >
-                    <XAxis type='number' allowDecimals={false} hide />
-                    <YAxis
-                      type='category'
-                      dataKey='chave'
-                      tickLine={false}
-                      axisLine={false}
-                      width={150}
-                      interval={0}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar
-                      dataKey='total'
-                      fill='var(--color-total)'
-                      radius={[0, 4, 4, 0]}
-                    />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalhamento</CardTitle>
+                <CardTitle role='heading' aria-level={2}>
+                  Vagas por {DIMENSAO_LABELS[dimensao]}
+                </CardTitle>
                 <CardDescription>
-                  Prazo medido pela meta de 20 dias úteis (ADR 0002)
+                  <NumberFlow value={somaTotal} />{' '}
+                  {somaTotal === 1 ? 'vaga' : 'vagas'} no recorte
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='overflow-x-auto rounded-md border'>
+                {/* Leitores de tela recebem o resumo; o ranking é decorativo */}
+                <p className='sr-only'>
+                  {linhas
+                    .map((linha) => `${linha.chave}: ${linha.total} vagas`)
+                    .join('. ')}
+                </p>
+                <RankingDimensao
+                  linhas={linhas}
+                  porStatus={dimensao === 'status'}
+                />
+              </CardContent>
+            </Card>
+
+            <Card className='stagger-item shadow-(--shadow-border) transition-shadow duration-200 ease-out hover:shadow-(--shadow-border-hover)'>
+              <CardHeader>
+                <CardTitle role='heading' aria-level={2}>
+                  Detalhamento
+                </CardTitle>
+                <CardDescription>
+                  {`Prazo medido pela meta de ${SLA_META_DIAS_UTEIS} dias úteis`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='overflow-x-auto rounded-md shadow-(--shadow-border)'>
                   <Table>
+                    <TableCaption className='sr-only'>
+                      Vagas por {DIMENSAO_LABELS[dimensao]}: total, ativas,
+                      finalizadas, percentual no prazo e média de SLA em dias
+                      úteis
+                    </TableCaption>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>{DIMENSAO_LABELS[dimensao]}</TableHead>
-                        <TableHead className='text-end'>Total</TableHead>
-                        <TableHead className='text-end'>Ativas</TableHead>
-                        <TableHead className='text-end'>Finalizadas</TableHead>
-                        <TableHead className='text-end'>% no prazo</TableHead>
-                        <TableHead className='text-end'>
-                          Média SLA (d.ú.)
+                        <TableHead scope='col'>
+                          {DIMENSAO_LABELS[dimensao]}
+                        </TableHead>
+                        <TableHead scope='col' className='text-end'>
+                          Total
+                        </TableHead>
+                        <TableHead scope='col' className='text-end'>
+                          Ativas
+                        </TableHead>
+                        <TableHead scope='col' className='text-end'>
+                          Finalizadas
+                        </TableHead>
+                        <TableHead scope='col' className='text-end'>
+                          % no prazo
+                        </TableHead>
+                        <TableHead scope='col' className='text-end'>
+                          Média de SLA (dias úteis)
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -256,7 +296,9 @@ export function Relatorios() {
                             {linha.finalizadas}
                           </TableCell>
                           <TableCell className='text-end tabular-nums'>
-                            {linha.percentualNoPrazo}%
+                            {linha.finalizadas === 0
+                              ? '—'
+                              : `${linha.percentualNoPrazo}%`}
                           </TableCell>
                           <TableCell className='text-end tabular-nums'>
                             {linha.mediaSlaDiasUteis}

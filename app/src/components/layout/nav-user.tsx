@@ -46,8 +46,12 @@ export function NavUser({ user }: NavUserProps) {
                   <AvatarFallback className='rounded-lg'>SN</AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-start text-sm leading-tight'>
-                  <span className='truncate font-semibold'>{user.name}</span>
-                  <span className='truncate text-xs'>{user.email}</span>
+                  <span className='truncate font-semibold' title={user.name}>
+                    {user.name}
+                  </span>
+                  <span className='truncate text-xs' title={user.email}>
+                    {user.email}
+                  </span>
                 </div>
                 <ChevronsUpDown className='ms-auto size-4' />
               </SidebarMenuButton>

@@ -108,6 +108,29 @@ describe('UserAuthForm', () => {
     })
   })
 
+  it('authenticates immediately via Microsoft button', async () => {
+    vi.clearAllMocks()
+
+    const { getByRole } = await render(<UserAuthForm />)
+
+    await userEvent.click(
+      getByRole('button', { name: /Entrar com Microsoft/i })
+    )
+
+    await vi.waitFor(() => expect(setUserMock).toHaveBeenCalledOnce())
+    expect(setUserMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'recrutadora@sesi.org.br',
+        role: expect.any(Array),
+      })
+    )
+    expect(setAccessTokenMock).toHaveBeenCalledWith('mock-access-token')
+
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith({ to: '/', replace: true })
+    )
+  })
+
   it('navigates to redirectTo when provided', async () => {
     vi.clearAllMocks()
 
@@ -118,7 +141,7 @@ describe('UserAuthForm', () => {
     await userEvent.fill(getByRole('textbox', { name: /E-mail/i }), 'a@b.com')
     await userEvent.fill(getByLabelText('Senha'), '1234567')
 
-    await userEvent.click(getByRole('button', { name: /Entrar/i }))
+    await userEvent.click(getByRole('button', { name: /^Entrar$/i }))
 
     await vi.waitFor(() => expect(setUserMock).toHaveBeenCalledOnce())
     expect(setAccessTokenMock).toHaveBeenCalledOnce()

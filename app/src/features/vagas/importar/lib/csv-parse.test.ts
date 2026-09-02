@@ -54,7 +54,7 @@ describe('validarLayout (RF20)', () => {
   it('aponta colunas obrigatórias ausentes', () => {
     const erros = validarLayout(['Chamado', 'Cargo'])
     expect(erros.length).toBeGreaterThan(0)
-    expect(erros.join(' ')).toContain('unidade')
+    expect(erros.join(' ')).toContain('Adicione a coluna "unidade"')
   })
 })
 
@@ -95,14 +95,18 @@ describe('mapearLinhas', () => {
     expect(importadas).toHaveLength(1)
     expect(erros).toHaveLength(1)
     expect(erros[0].linha).toBe(3)
-    expect(erros[0].mensagem).toContain('chamado e/ou código')
+    expect(erros[0].mensagem).toContain(
+      'Chamado e código da vaga: preencha ao menos um dos dois'
+    )
   })
 
   it('rejeita data em formato inválido', () => {
     const dataRuim =
       'CH-3;VG-3;Gestor;SESI Recife;TI;Dev;Indeterminado;Rec;2026-07-01'
     const { erros } = mapearLinhas(parseCsv(csv(dataRuim)), 'a.csv')
-    expect(erros[0].mensagem).toContain('dd/mm/aaaa')
+    expect(erros[0].mensagem).toContain(
+      'Data de abertura: use o formato dd/mm/aaaa'
+    )
   })
 })
 

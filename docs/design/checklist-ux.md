@@ -19,7 +19,7 @@ fontes:
 ### Estados (os 4 obrigatórios — IA §14)
 - [ ] **Vazio** desenhado, com CTA que tira o usuário do vazio (não só "nenhum resultado").
 - [ ] **Carregando** com Skeleton no formato do conteúdo final.
-- [ ] **Erro / sem permissão** tratado (inline ou `/erros/401|403|404|500`).
+- [ ] **Erro / sem permissão** tratado (inline ou `/401|403|404|500`).
 - [ ] **Feedback de ação** — toda mutação confirma com toast; erro diz o que houve + como resolver.
 
 ### Hierarquia e conteúdo

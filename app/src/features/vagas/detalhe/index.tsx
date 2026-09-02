@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, format } from 'date-fns'
+import { format } from 'date-fns'
 import { Link, useParams } from '@tanstack/react-router'
 import { ptBR } from 'date-fns/locale'
 import { ArrowLeft, Pencil, RotateCcw } from 'lucide-react'
@@ -20,21 +20,34 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ConfigDrawer } from '@/components/config-drawer'
+// Tabs do iconiq (r-tabs): indicador animado que persegue a aba ativa
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/iconiq/r-tabs'
+import { ScrollProgress } from '@/components/iconiq/scroll-progress'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { PapelSwitcher } from '@/components/papel-switcher'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { MudarAcao } from '../components/acoes/mudar-acao'
+import { MudarStatus } from '../components/acoes/mudar-status'
 import { SlaIndicator } from '../components/sla-indicator'
 import { StatusBadge } from '../components/status-badge'
 import { acaoOptions } from '../data/data'
 import { type Vaga } from '../data/schema'
 import { useVaga } from '../data/vagas-store'
 import { podeVerDadosSensiveis, usePapel } from '../lib/papel'
-import { slaDaVaga, tempoDoGestorDiasUteis } from '../lib/sla-vaga'
+import {
+  slaDaVaga,
+  tempoDoGestorDiasUteis,
+  tempoDoJuridicoDiasUteis,
+} from '../lib/sla-vaga'
 import { AcaoStepper } from './acao-stepper'
 import { CampoLinha } from './campo-linha'
 import { CampoSensivel } from './campo-sensivel'
@@ -44,8 +57,7 @@ import {
   EditarResultado,
 } from './editar-secao'
 import { HistoricoTimeline } from './historico-timeline'
-import { MudarAcao } from './mudar-acao'
-import { MudarStatus } from './mudar-status'
+import { ObservacoesEtapas } from './observacoes-etapas'
 
 const ORIGEM_LABELS: Record<Vaga['origemDoCadastro'], string> = {
   manual: 'Manual',
@@ -74,14 +86,7 @@ function formatarBool(valor?: boolean): string | undefined {
   return valor ? 'Sim' : 'Não'
 }
 
-// Duração em dias corridos entre duas datas — só quando ambas existem
-function duracaoEmDias(inicio?: Date, fim?: Date): string | undefined {
-  if (!inicio || !fim) return undefined
-  const dias = differenceInCalendarDays(fim, inicio)
-  return `${dias} ${dias === 1 ? 'dia' : 'dias'}`
-}
-
-// Medição do gestor em dias ÚTEIS (B2); "em andamento" enquanto não há retorno
+// Medições em dias ÚTEIS; "em andamento" enquanto não há data de término
 function formatarDiasUteis(
   dias: number | undefined,
   emAndamento: boolean
@@ -130,6 +135,17 @@ function VagaDetalhe({ vagaId }: { vagaId: string }) {
 
         {vaga ? <DetalheConteudo vaga={vaga} /> : <VagaNaoEncontrada />}
       </Main>
+
+      {/* Régua de progresso de leitura (iconiq) — página longa de 6 abas.
+          Sem rótulo numérico: o "%" flutuante lê como artefato ao lado da
+          barra de rolagem real */}
+      {vaga && (
+        <ScrollProgress
+          position='right'
+          showLabel={false}
+          className='max-lg:hidden'
+        />
+      )}
     </>
   )
 }
@@ -137,7 +153,7 @@ function VagaDetalhe({ vagaId }: { vagaId: string }) {
 function VagaNaoEncontrada() {
   return (
     <div className='flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center'>
-      <h2 className='text-2xl font-bold tracking-tight'>Vaga não encontrada</h2>
+      <h1 className='text-2xl font-bold tracking-tight'>Vaga não encontrada</h1>
       <p className='text-muted-foreground'>
         A vaga que você procura não existe ou foi removida.
       </p>
@@ -165,7 +181,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
           <p className='text-sm text-muted-foreground'>
             Chamado {vaga.chamado} · Código {vaga.codigoVaga}
           </p>
-          <h2 className='text-2xl font-bold tracking-tight'>{vaga.cargo}</h2>
+          <h1 className='text-2xl font-bold tracking-tight'>{vaga.cargo}</h1>
           <div className='flex flex-wrap items-center gap-2'>
             <StatusBadge status={vaga.status} />
             {acao && (
@@ -174,7 +190,12 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 {acao.label}
               </Badge>
             )}
-            <SlaIndicator diasUteis={slaDaVaga(vaga)} />
+            <SlaIndicator
+              diasUteis={slaDaVaga(vaga)}
+              encerrada={['finalizada', 'cancelada', 'arquivada'].includes(
+                vaga.status
+              )}
+            />
           </div>
         </div>
         <div className='flex items-center gap-2'>
@@ -190,11 +211,12 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
       </div>
 
       <Tabs defaultValue='visao-geral' className='gap-4'>
-        <TabsList className='max-w-full overflow-x-auto'>
+        <TabsList className='w-full justify-start overflow-x-auto p-1.5'>
           <TabsTrigger value='visao-geral'>Visão geral</TabsTrigger>
           <TabsTrigger value='processo'>Processo</TabsTrigger>
-          <TabsTrigger value='gestor-juridico'>Gestor & Jurídico</TabsTrigger>
-          <TabsTrigger value='resultado'>Resultado & Candidato</TabsTrigger>
+          <TabsTrigger value='gestor-juridico'>Gestor e Jurídico</TabsTrigger>
+          <TabsTrigger value='resultado'>Resultado e candidato</TabsTrigger>
+          <TabsTrigger value='observacoes'>Observações</TabsTrigger>
           <TabsTrigger value='historico'>Histórico</TabsTrigger>
         </TabsList>
 
@@ -221,13 +243,20 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Identificação</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Identificação
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Chamado'>{vaga.chamado}</CampoLinha>
                 <CampoLinha label='Código da vaga'>
                   {vaga.codigoVaga}
+                </CampoLinha>
+                <CampoLinha label='Código da vaga de origem'>
+                  {vaga.reaberturaDe
+                    ? (vagaOrigem?.codigoVaga ?? vaga.reaberturaDe)
+                    : undefined}
                 </CampoLinha>
                 <CampoLinha label='Data de recebimento'>
                   {formatarData(vaga.dataRecebimento)}
@@ -251,7 +280,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Solicitante</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Solicitante
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -266,7 +297,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Perfil da vaga</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Perfil da vaga
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -279,12 +312,15 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 <CampoLinha label='Motivo da contratação'>
                   {vaga.motivoContratacao}
                 </CampoLinha>
-                <CampoLinha label='PCD'>{formatarBool(vaga.pcd)}</CampoLinha>
-                <div className='sm:col-span-2 lg:col-span-3'>
-                  <CampoLinha label='Observações'>
-                    {vaga.observacoes}
-                  </CampoLinha>
-                </div>
+                <CampoLinha label='Vaga destinada a PcD'>
+                  {formatarBool(vaga.pcd)}
+                </CampoLinha>
+                <CampoLinha
+                  label='Observações'
+                  className='sm:col-span-2 lg:col-span-3'
+                >
+                  {vaga.observacoes}
+                </CampoLinha>
               </dl>
             </CardContent>
           </Card>
@@ -293,7 +329,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
         <TabsContent value='processo' className='space-y-4'>
           <Card>
             <CardHeader>
-              <CardTitle>Etapas do processo</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Etapas do processo
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <AcaoStepper
@@ -306,7 +344,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
           {/* Cronograma seletivo (RF13) — datas por etapa */}
           <Card>
             <CardHeader>
-              <CardTitle>Cronograma seletivo</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Cronograma seletivo
+              </CardTitle>
               <CardAction>
                 <EditarCronograma vaga={vaga} />
               </CardAction>
@@ -343,12 +383,14 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
         </TabsContent>
 
         {/* Tempo do gestor e Tempo do jurídico são MEDIÇÕES, não SLAs
-            (CONTEXT.md). Gestor mede em dias ÚTEIS (B2); jurídico, em
-            dias corridos. */}
+            (CONTEXT.md). Ambos medem em dias ÚTEIS (regra revisada com a
+            cliente em set/2026 — antes o jurídico corria em dias corridos). */}
         <TabsContent value='gestor-juridico' className='space-y-4'>
           <Card>
             <CardHeader>
-              <CardTitle>Tempo do gestor</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Tempo do gestor
+              </CardTitle>
               <CardAction>
                 <EditarGestorJuridico vaga={vaga} />
               </CardAction>
@@ -361,7 +403,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 <CampoLinha label='Retorno do gestor'>
                   {formatarData(vaga.dataRetornoGestor)}
                 </CampoLinha>
-                <CampoLinha label='Duração (dias úteis)'>
+                <CampoLinha label='Duração'>
                   {formatarDiasUteis(
                     tempoDoGestorDiasUteis(vaga),
                     !vaga.dataRetornoGestor
@@ -373,7 +415,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tempo do jurídico</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Tempo do jurídico
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
@@ -386,10 +430,10 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 <CampoLinha label='Recebimento do parecer'>
                   {formatarData(vaga.recebimentoParecerJuridico)}
                 </CampoLinha>
-                <CampoLinha label='Duração (dias corridos)'>
-                  {duracaoEmDias(
-                    vaga.aberturaChamadoJuridico,
-                    vaga.recebimentoParecerJuridico
+                <CampoLinha label='Duração'>
+                  {formatarDiasUteis(
+                    tempoDoJuridicoDiasUteis(vaga),
+                    !vaga.recebimentoParecerJuridico
                   )}
                 </CampoLinha>
               </dl>
@@ -400,7 +444,9 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
         <TabsContent value='resultado'>
           <Card>
             <CardHeader>
-              <CardTitle>Resultado & Candidato</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Resultado e candidato
+              </CardTitle>
               <CardAction>
                 <EditarResultado
                   vaga={vaga}
@@ -440,10 +486,16 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
           </Card>
         </TabsContent>
 
+        <TabsContent value='observacoes'>
+          <ObservacoesEtapas vaga={vaga} />
+        </TabsContent>
+
         <TabsContent value='historico'>
           <Card>
             <CardHeader>
-              <CardTitle>Histórico de alterações</CardTitle>
+              <CardTitle role='heading' aria-level={2}>
+                Histórico de alterações
+              </CardTitle>
             </CardHeader>
             <CardContent className='space-y-6'>
               <HistoricoTimeline eventos={vaga.historico ?? []} />

@@ -1,0 +1,267 @@
+'use client'
+
+import * as React from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { cn } from '@/lib/utils'
+
+const componentThemeClassName =
+  '[--ic-background:#ffffff] [--ic-foreground:#111111] [--ic-primary:#111111] [--ic-secondary:#646b75] [--ic-surface-border:#e9edf2] [--ic-border:#e3e7ec] [--ic-card:#ffffff] [--ic-card-foreground:#111111] [--ic-muted:#f5f7fa] [--ic-muted-foreground:#6d7480] [--ic-accent:#f3f5f8] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--ic-accent-foreground:#111111] [--ic-input:#e3e7ec] [--ic-ring:rgba(17,17,17,0.16)] [--ic-destructive:#dc2626] [--ic-paper:#fcfcfd] [--ic-popover-foreground:#111111] [--ic-brand:#0ea5e9] [--ic-brand-soft:#bae6fd] [--ic-shadow-soft:0_18px_38px_-24px_rgba(15,23,42,0.35)] [--ic-chart-1:oklch(0.52_0.19_254)] [--ic-chart-2:oklch(0.74_0.11_232)] [--ic-chart-3:oklch(0.42_0.16_262)] [--ic-chart-4:oklch(0.84_0.07_228)] [--ic-chart-5:oklch(0.62_0.14_240)] [--color-background:var(--ic-background)] [--color-foreground:var(--ic-foreground)] [--color-primary:var(--ic-primary)] [--color-secondary:var(--ic-secondary)] [--color-border:var(--ic-border)] [--color-card:var(--ic-card)] [--color-card-foreground:var(--ic-card-foreground)] [--color-muted:var(--ic-muted)] [--color-muted-foreground:var(--ic-muted-foreground)] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--color-input:var(--ic-input)] [--color-ring:var(--ic-ring)] [--color-destructive:var(--ic-destructive)] [--color-paper:var(--ic-paper)] [--color-popover-foreground:var(--ic-popover-foreground)] [--color-brand:var(--ic-brand)] [--color-brand-soft:var(--ic-brand-soft)] [--color-chart-1:var(--ic-chart-1)] [--color-chart-2:var(--ic-chart-2)] [--color-chart-3:var(--ic-chart-3)] [--color-chart-4:var(--ic-chart-4)] [--color-chart-5:var(--ic-chart-5)] dark:[--ic-background:#111111] dark:[--ic-foreground:#f6f3ec] dark:[--ic-primary:#f6f3ec] dark:[--ic-secondary:#cbc6bb] dark:[--ic-surface-border:#2a2a25] dark:[--ic-border:#2b2a25] dark:[--ic-card:#111111] dark:[--ic-card-foreground:#f6f3ec] dark:[--ic-muted:#171716] dark:[--ic-muted-foreground:#9a958a] dark:[--ic-accent:#1a1a18] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] dark:[--ic-accent-foreground:#f6f3ec] dark:[--ic-input:#2b2a25] dark:[--ic-ring:rgba(246,243,236,0.18)] dark:[--ic-destructive:#f87171] dark:[--ic-paper:#171716] dark:[--ic-popover-foreground:#f6f3ec] dark:[--ic-brand:#38bdf8] dark:[--ic-brand-soft:#0c4a6e] dark:[--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] dark:[--ic-chart-1:oklch(0.68_0.17_250)] dark:[--ic-chart-2:oklch(0.82_0.09_225)] dark:[--ic-chart-3:oklch(0.58_0.15_260)] dark:[--ic-chart-4:oklch(0.75_0.12_235)] dark:[--ic-chart-5:oklch(0.88_0.06_220)]'
+
+function getValidSelection(options: RadioOption[], candidate?: string) {
+  if (candidate === undefined) {
+    return options[0]?.value
+  }
+
+  return options.some((option) => option.value === candidate)
+    ? candidate
+    : options[0]?.value
+}
+
+export interface RadioOption {
+  value: string
+  label: string
+  description?: string
+}
+
+export interface RadioGroupProps {
+  options: RadioOption[]
+  defaultValue?: string
+  value?: string
+  onChange?: (value: string) => void
+  className?: string
+  layoutId?: string
+  name?: string
+  'aria-label'?: string
+  'aria-labelledby'?: string
+}
+
+export const RadioGroup: React.FC<RadioGroupProps> = ({
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  className,
+  defaultValue,
+  layoutId,
+  name,
+  onChange,
+  options,
+  value,
+}) => {
+  const generatedId = React.useId()
+  const isControlled = value !== undefined
+  const [uncontrolledSelected, setUncontrolledSelected] = React.useState<
+    string | undefined
+  >(() => getValidSelection(options, defaultValue))
+  const inputRefs = React.useRef<Array<HTMLInputElement | null>>([])
+  const selected = isControlled ? value : uncontrolledSelected
+  const resolvedLayoutId = layoutId ?? `radio-active-bg-${generatedId}`
+  const groupName = name ?? `radio-group-${generatedId}`
+
+  React.useEffect(() => {
+    if (isControlled) {
+      return
+    }
+
+    const normalized = getValidSelection(options, uncontrolledSelected)
+
+    if (normalized !== uncontrolledSelected) {
+      setUncontrolledSelected(normalized)
+    }
+  }, [isControlled, options, uncontrolledSelected])
+
+  const handleSelect = React.useCallback(
+    (nextValue: string) => {
+      if (nextValue === selected) {
+        return
+      }
+
+      if (!isControlled) {
+        setUncontrolledSelected(nextValue)
+      }
+
+      onChange?.(nextValue)
+    },
+    [isControlled, onChange, selected]
+  )
+
+  const focusAndSelect = React.useCallback(
+    (index: number) => {
+      const nextOption = options[index]
+
+      if (!nextOption) {
+        return
+      }
+
+      inputRefs.current[index]?.focus()
+      handleSelect(nextOption.value)
+    },
+    [handleSelect, options]
+  )
+
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+      switch (event.key) {
+        case 'ArrowDown':
+        case 'ArrowRight': {
+          event.preventDefault()
+          focusAndSelect((index + 1) % options.length)
+          break
+        }
+        case 'ArrowUp':
+        case 'ArrowLeft': {
+          event.preventDefault()
+          focusAndSelect((index - 1 + options.length) % options.length)
+          break
+        }
+        case 'Home': {
+          event.preventDefault()
+          focusAndSelect(0)
+          break
+        }
+        case 'End': {
+          event.preventDefault()
+          focusAndSelect(options.length - 1)
+          break
+        }
+        default:
+          break
+      }
+    },
+    [focusAndSelect, options.length]
+  )
+
+  if (options.length === 0) {
+    return null
+  }
+
+  const tabStopValue = getValidSelection(options, selected)
+
+  return (
+    <div
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      aria-orientation='vertical'
+      className={cn(
+        componentThemeClassName,
+        'flex flex-col gap-0.5',
+        className
+      )}
+      role='radiogroup'
+    >
+      {options.map((option, index) => {
+        const isSelected = selected === option.value
+        const optionId = `${generatedId}-option-${index}`
+        const labelId = `${optionId}-label`
+        const descriptionId = option.description
+          ? `${optionId}-description`
+          : undefined
+
+        return (
+          <motion.label
+            animate={{ opacity: 1, y: 0 }}
+            className='block cursor-pointer'
+            initial={{ opacity: 0, y: 8 }}
+            key={option.value}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            whileHover={{ x: 2 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            <input
+              aria-describedby={descriptionId}
+              aria-labelledby={labelId}
+              checked={isSelected}
+              className='peer sr-only'
+              name={groupName}
+              onChange={() => handleSelect(option.value)}
+              onKeyDown={(event) => handleKeyDown(event, index)}
+              ref={(node) => {
+                inputRefs.current[index] = node
+              }}
+              tabIndex={option.value === tabStopValue ? 0 : -1}
+              type='radio'
+              value={option.value}
+            />
+
+            <div className='relative flex touch-manipulation items-center gap-3.5 rounded-lg px-4 py-3.5 text-left outline-none select-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring'>
+              {isSelected && (
+                <motion.div
+                  aria-hidden
+                  className='absolute inset-0 rounded-lg bg-foreground/[0.04]'
+                  layoutId={resolvedLayoutId}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 28,
+                    mass: 0.8,
+                  }}
+                />
+              )}
+
+              <div
+                aria-hidden
+                className='relative z-10 flex h-5 w-5 shrink-0 items-center justify-center'
+              >
+                <motion.div
+                  animate={{
+                    borderWidth: isSelected ? 6 : 2,
+                    borderColor: isSelected
+                      ? 'var(--ic-primary)'
+                      : 'color-mix(in srgb, var(--ic-muted-foreground) 25%, transparent)',
+                  }}
+                  className='absolute inset-0 rounded-full'
+                  style={{ borderStyle: 'solid' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                />
+
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      animate={{ scale: 1, opacity: 1 }}
+                      className='absolute h-1.5 w-1.5 rounded-full bg-background'
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 500,
+                        damping: 25,
+                        delay: 0.05,
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className='relative z-10 flex flex-col gap-0.5'>
+                <motion.span
+                  animate={{
+                    color: isSelected
+                      ? 'var(--ic-foreground)'
+                      : 'var(--ic-muted-foreground)',
+                    fontWeight: isSelected ? 500 : 400,
+                  }}
+                  className='text-[14px] leading-tight'
+                  id={labelId}
+                  transition={{ duration: 0.2 }}
+                >
+                  {option.label}
+                </motion.span>
+
+                {option.description && (
+                  <motion.span
+                    animate={{ opacity: isSelected ? 0.85 : 0.5 }}
+                    className='text-xs leading-snug text-muted-foreground/60'
+                    id={descriptionId}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {option.description}
+                  </motion.span>
+                )}
+              </div>
+            </div>
+          </motion.label>
+        )
+      })}
+    </div>
+  )
+}
+
+export default RadioGroup

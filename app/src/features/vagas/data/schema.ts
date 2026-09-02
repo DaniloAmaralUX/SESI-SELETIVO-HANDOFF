@@ -1,7 +1,10 @@
 import { z } from 'zod'
 
 // Status = situação da Vaga. Eixo independente da Ação atual (ADR 0001).
+// Rascunho = em preparação; o processo (e o SLA) só começa ao entrar em
+// andamento (rascunho -> aberta).
 export const STATUS_VAGA = [
+  'rascunho',
   'aberta',
   'suspensa',
   'congelada',
@@ -42,6 +45,7 @@ const TIPOS_EVENTO = [
   'mudanca-status',
   'mudanca-acao',
   'importacao',
+  'observacao',
 ] as const
 
 export const eventoHistoricoSchema = z.object({
@@ -52,6 +56,19 @@ export const eventoHistoricoSchema = z.object({
 })
 
 export type EventoHistorico = z.infer<typeof eventoHistoricoSchema>
+
+// Observação por etapa do processo — registro imutável tipo comentário,
+// acumulado como linha do tempo; gravado só pela porta de persistência.
+export const OBSERVACAO_MAX_CHARS = 500
+
+export const observacaoEtapaSchema = z.object({
+  etapa: acaoVagaSchema,
+  texto: z.string().min(1).max(OBSERVACAO_MAX_CHARS),
+  em: z.coerce.date(),
+  por: z.string(),
+})
+
+export type ObservacaoEtapa = z.infer<typeof observacaoEtapaSchema>
 
 // Objeto base — a fonte única de campos. O `vagaSchema` (com refine) e os
 // schemas de criar/editar derivam daqui via pick/omit.
@@ -118,6 +135,8 @@ const vagaObjectSchema = z.object({
   atualizadoPor: z.string().optional(),
   // Histórico de alterações (RF16) — trilha imutável de eventos
   historico: z.array(eventoHistoricoSchema).optional(),
+  // Observações por etapa — trilha imutável, fora dos schemas de criar/editar
+  observacoesEtapas: z.array(observacaoEtapaSchema).optional(),
 })
 
 // Regra invariante: motivo obrigatório quando cancelada (CONTEXT.md).
@@ -164,6 +183,19 @@ export const vagaCreateSchema = vagaObjectSchema
     // fallback quando vazio.
     dataRecebimento: z.coerce.date().optional(),
     pcd: z.boolean().default(false),
+    // Obrigatórios do form de criação com mensagens em PT-BR — sobrescreve
+    // só aqui; o vagaObjectSchema base segue sem mensagens (seed/edit).
+    gestorSolicitante: z
+      .string()
+      .min(1, 'Informe o nome do gestor solicitante'),
+    unidade: z.string().min(1, 'Informe a unidade'),
+    area: z.string().min(1, 'Informe a área'),
+    cargo: z.string().min(1, 'Informe o cargo'),
+    recrutadora: z.string().min(1, 'Informe a recrutadora responsável'),
+    tipoContrato: z.enum(
+      ['determinado', 'indeterminado', 'estagiario', 'intermitente'],
+      { error: 'Selecione o tipo de contrato' }
+    ),
   })
   .refine((v) => Boolean(v.chamado?.trim() || v.codigoVaga?.trim()), {
     message: 'Informe o nº do chamado e/ou o código da vaga',

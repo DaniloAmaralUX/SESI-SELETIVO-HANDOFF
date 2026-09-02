@@ -40,30 +40,37 @@ export function DataTableColumnHeader<TData, TValue>({
             className='h-8 data-[state=open]:bg-accent'
           >
             <span>{title}</span>
+            <span className='sr-only'>
+              {column.getIsSorted() === 'asc'
+                ? ', ordenado em ordem crescente'
+                : column.getIsSorted() === 'desc'
+                  ? ', ordenado em ordem decrescente'
+                  : ', não ordenado'}
+            </span>
             {column.getIsSorted() === 'desc' ? (
-              <ArrowDownIcon className='ms-2 h-4 w-4' />
+              <ArrowDownIcon className='ms-2 h-4 w-4' aria-hidden='true' />
             ) : column.getIsSorted() === 'asc' ? (
-              <ArrowUpIcon className='ms-2 h-4 w-4' />
+              <ArrowUpIcon className='ms-2 h-4 w-4' aria-hidden='true' />
             ) : (
-              <CaretSortIcon className='ms-2 h-4 w-4' />
+              <CaretSortIcon className='ms-2 h-4 w-4' aria-hidden='true' />
             )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='start'>
           <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
             <ArrowUpIcon className='size-3.5 text-muted-foreground/70' />
-            Asc
+            Ordenar crescente
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
             <ArrowDownIcon className='size-3.5 text-muted-foreground/70' />
-            Desc
+            Ordenar decrescente
           </DropdownMenuItem>
           {column.getCanHide() && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
                 <EyeNoneIcon className='size-3.5 text-muted-foreground/70' />
-                Hide
+                Ocultar coluna
               </DropdownMenuItem>
             </>
           )}

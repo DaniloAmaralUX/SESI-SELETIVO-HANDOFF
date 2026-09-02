@@ -24,3 +24,40 @@ describe('gerarCsv (RF25)', () => {
     expect(csv.split('\r\n')[1]).toBe(';;x')
   })
 })
+
+// As observações por etapa levam texto livre do usuário para a planilha: uma
+// célula iniciada por =, +, -, @ é executada como fórmula por Excel/Sheets.
+describe('gerarCsv — injeção de fórmula', () => {
+  it('prefixa aspa simples nos gatilhos de fórmula', () => {
+    const csv = gerarCsv(
+      ['Observações'],
+      [['=1+1'], ['+A1'], ['@SUM(A1)'], ['-1+1']]
+    )
+    const linhas = csv.split('\r\n')
+    expect(linhas[1]).toBe("'=1+1")
+    expect(linhas[2]).toBe("'+A1")
+    expect(linhas[3]).toBe("'@SUM(A1)")
+    expect(linhas[4]).toBe("'-1+1")
+  })
+
+  it('desarma HYPERLINK e DDE mesmo com o escape de aspas em volta', () => {
+    const csv = gerarCsv(
+      ['Observações'],
+      [['=HYPERLINK("https://x.tld";"Ver")'], ["=cmd|'/c calc'!A1"]]
+    )
+    const linhas = csv.split('\r\n')
+    // Entre aspas por causa do ';' — mas o conteúdo já começa por aspa simples
+    expect(linhas[1]).toBe('"\'=HYPERLINK(""https://x.tld"";""Ver"")"')
+    expect(linhas[2]).toBe("'=cmd|'/c calc'!A1")
+  })
+
+  it('preserva número negativo como número (não é fórmula)', () => {
+    const csv = gerarCsv(['SLA'], [[-5], ['-12'], [-3.5], [0]])
+    expect(csv.split('\r\n').slice(1)).toEqual(['-5', '-12', '-3.5', '0'])
+  })
+
+  it('não toca em texto comum nem em célula vazia', () => {
+    const csv = gerarCsv(['A'], [['Gestor pediu prioridade'], ['']])
+    expect(csv.split('\r\n').slice(1)).toEqual(['Gestor pediu prioridade', ''])
+  })
+})

@@ -17,6 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -94,11 +95,13 @@ function SecaoDialog<T extends FieldValues>({
 
   return (
     <Dialog open={aberto} onOpenChange={setAberto}>
-      <Button variant='outline' size='sm' onClick={() => setAberto(true)}>
-        <Pencil className='size-4' />
-        Editar
-      </Button>
-      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-lg'>
+      <DialogTrigger asChild>
+        <Button variant='outline' size='sm'>
+          <Pencil className='size-4' />
+          Editar
+        </Button>
+      </DialogTrigger>
+      <DialogContent className='max-h-[90vh] overflow-y-auto overscroll-contain sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle>{titulo}</DialogTitle>
           <DialogDescription>{descricao}</DialogDescription>
@@ -161,7 +164,7 @@ export function EditarGestorJuridico({ vaga }: { vaga: Vaga }) {
   return (
     <SecaoDialog<GestorJuridicoEditInput>
       vaga={vaga}
-      titulo='Gestor & Jurídico'
+      titulo='Gestor e Jurídico'
       descricao='Datas de encaminhamento e retorno que alimentam as medições de tempo.'
       resolver={
         zodResolver(
@@ -199,6 +202,8 @@ export function EditarGestorJuridico({ vaga }: { vaga: Vaga }) {
                 <FormControl>
                   <Input
                     placeholder='Ex.: JUR-12345'
+                    autoComplete='off'
+                    spellCheck={false}
                     {...field}
                     value={field.value ?? ''}
                   />
@@ -300,7 +305,7 @@ export function EditarResultado({
   return (
     <SecaoDialog<ResultadoEditInput>
       vaga={vaga}
-      titulo='Resultado & Candidato'
+      titulo='Resultado e candidato'
       descricao='Registro do desfecho do processo seletivo (RF14/RF15).'
       resolver={
         zodResolver(resultadoEditSchema) as Resolver<ResultadoEditInput>

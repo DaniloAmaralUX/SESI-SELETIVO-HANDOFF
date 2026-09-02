@@ -69,16 +69,20 @@ export function DataTableDateRangeFilter<TData, TValue>({
       </PopoverTrigger>
       <PopoverContent className='w-72 space-y-3' align='start'>
         <div className='space-y-2'>
-          <Label>De</Label>
+          <Label id='filtro-de-label'>De</Label>
           <DatePicker
+            id='filtro-de'
+            aria-labelledby='filtro-de-label filtro-de'
             selected={valor.de}
             onSelect={(de) => definir({ de })}
             limpavel
           />
         </div>
         <div className='space-y-2'>
-          <Label>Até</Label>
+          <Label id='filtro-ate-label'>Até</Label>
           <DatePicker
+            id='filtro-ate'
+            aria-labelledby='filtro-ate-label filtro-ate'
             selected={valor.ate}
             onSelect={(ate) => definir({ ate })}
             limpavel

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { format, parse } from 'date-fns'
 import { Link, getRouteApi } from '@tanstack/react-router'
 import { Briefcase } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,29 @@ import { DataTable } from '@/components/data-table'
 import { acaoOptions, statusOptions } from '../data/data'
 import { type Vaga } from '../data/schema'
 import { ExportarCsv } from './exportar-csv'
+import { VagasCards } from './vagas-cards'
 import { vagasColumns, vagasColumnVisibility } from './vagas-columns'
+
+// Período na URL como yyyy-MM-dd; parse LOCAL (date-fns) — `new Date(string)`
+// interpretaria como UTC e deslocaria o dia
+type PeriodoUrl = { de?: string; ate?: string }
+type PeriodoFiltro = { de?: Date; ate?: Date }
+
+const serializaPeriodo = (value: unknown) => {
+  const { de, ate } = (value ?? {}) as PeriodoFiltro
+  return {
+    de: de ? format(de, 'yyyy-MM-dd') : undefined,
+    ate: ate ? format(ate, 'yyyy-MM-dd') : undefined,
+  }
+}
+
+const deserializaPeriodo = (raw: unknown) => {
+  const { de, ate } = (raw ?? {}) as PeriodoUrl
+  const paraData = (s?: string) =>
+    s ? parse(s, 'yyyy-MM-dd', new Date()) : undefined
+  const valor: PeriodoFiltro = { de: paraData(de), ate: paraData(ate) }
+  return valor.de || valor.ate ? valor : undefined
+}
 
 const route = getRouteApi('/_authenticated/vagas/')
 
@@ -58,10 +81,22 @@ export function VagasTable({ data }: VagasTableProps) {
           { columnId: 'area', searchKey: 'area', type: 'array' },
           { columnId: 'recrutadora', searchKey: 'recrutadora', type: 'array' },
           { columnId: 'gestorSolicitante', searchKey: 'gestor', type: 'array' },
-          // Período (dataAbertura) fica fora da URL: o hook preserva filtros
-          // não configurados no estado local da tabela
+          // Período na URL (docs: filtros sobrevivem à navegação e a URL é
+          // compartilhável) — tipo custom com transformers yyyy-MM-dd
+          {
+            columnId: 'dataAbertura',
+            searchKey: 'periodo',
+            type: 'custom',
+            serialize: serializaPeriodo,
+            deserialize: deserializaPeriodo,
+          },
         ],
       }}
+      // SLA desc: a vaga mais crítica no topo — "o que vence hoje" sem
+      // nenhuma interação (docs §1, <10s)
+      initialSorting={[{ id: 'sla', desc: true }]}
+      tableClassName='min-w-4xl'
+      mobileView={(table) => <VagasCards table={table} />}
       toolbar={{
         searchPlaceholder: 'Filtrar por chamado ou cargo...',
         filters: [
@@ -107,7 +142,7 @@ export function VagasTable({ data }: VagasTableProps) {
           <EmptyContent>
             <div className='flex gap-2'>
               <Button size='sm' asChild>
-                <Link to='/vagas/nova'>Criar vaga</Link>
+                <Link to='/vagas/nova'>Nova vaga</Link>
               </Button>
               <Button size='sm' variant='outline' asChild>
                 <Link to='/vagas/importar'>Importar planilha</Link>

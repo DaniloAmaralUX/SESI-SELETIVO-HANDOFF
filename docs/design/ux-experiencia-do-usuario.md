@@ -50,7 +50,7 @@ fontes:
 
 - **Sucesso:** toast (Sonner) curto, com ação de desfazer quando aplicável.
 - **Erro de validação:** inline no campo, mensagem específica; foco vai ao primeiro campo inválido.
-- **Erro de sistema:** Alert no contexto + rota `/erros/*` para falhas de página inteira.
+- **Erro de sistema:** Alert no contexto + rota de erro dedicada (`/401`, `/403`, `/404`, `/500`, `/503`) para falhas de página inteira.
 - **Carregamento:** Skeleton com o formato do conteúdo final (linhas de tabela, cards) — nunca
   spinner de página inteira em navegações internas.
 - **Vazio:** cada superfície tem empty state com CTA (ver fluxos, seção "Estados vazios").

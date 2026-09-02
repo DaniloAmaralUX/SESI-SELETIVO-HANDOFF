@@ -31,6 +31,7 @@ pnpm lint           # ESLint
 pnpm format         # Prettier --write (ordena imports e classes Tailwind)
 pnpm format:check   # Prettier --check
 pnpm knip           # detecta código/exports mortos
+pnpm check:links    # links internos dos .md (caminhos e âncoras)
 ```
 
 ## Testes

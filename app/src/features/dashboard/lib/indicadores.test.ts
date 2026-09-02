@@ -68,15 +68,18 @@ describe('resumoSla (vagas ativas)', () => {
 })
 
 describe('contagens', () => {
-  it('contagemPorStatus cobre os 6 status na ordem canônica', () => {
+  it('contagemPorStatus cobre os 7 status na ordem canônica', () => {
     const vagas = [
       vaga({ status: 'aberta' }),
       vaga({ status: 'aberta' }),
       vaga({ status: 'cancelada', motivoCancelamento: 'x' }),
     ]
     const c = contagemPorStatus(vagas)
-    expect(c).toHaveLength(6)
-    expect(c[0]).toMatchObject({ status: 'aberta', total: 2 })
+    expect(c).toHaveLength(7)
+    expect(c.find((x) => x.status === 'aberta')).toMatchObject({
+      status: 'aberta',
+      total: 2,
+    })
     expect(c.find((x) => x.status === 'cancelada')?.total).toBe(1)
     expect(c.find((x) => x.status === 'suspensa')?.total).toBe(0)
   })
@@ -89,6 +92,20 @@ describe('contagens', () => {
     const c = contagemPorAcao(vagas)
     expect(c.find((x) => x.acao === 'inscricoes')?.total).toBe(1)
     expect(c.find((x) => x.acao === 'admissao')?.total).toBe(0) // terminal fora
+  })
+
+  it('contagemPorUnidade conta só as ativas', () => {
+    const vagas = [
+      vaga({ status: 'aberta', unidade: 'SESI Recife' }),
+      vaga({ status: 'rascunho', unidade: 'SESI Recife' }),
+      vaga({ status: 'arquivada', unidade: 'SESI Recife' }),
+      vaga({ status: 'suspensa', unidade: 'SESI Caruaru' }),
+    ]
+    const c = contagemPorUnidade(vagas)
+    expect(c).toEqual([
+      { unidade: 'SESI Recife', total: 1 },
+      { unidade: 'SESI Caruaru', total: 1 },
+    ])
   })
 
   it('contagemPorUnidade ordena do maior para o menor', () => {

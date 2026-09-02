@@ -48,7 +48,11 @@ export function DataTablePagination<TData>({
               table.setPageSize(Number(value))
             }}
           >
-            <SelectTrigger className='h-8 w-17.5'>
+            <SelectTrigger
+              aria-label='Linhas por página'
+              id='linhas-por-pagina'
+              className='h-8 w-17.5'
+            >
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side='top'>
@@ -59,14 +63,17 @@ export function DataTablePagination<TData>({
               ))}
             </SelectContent>
           </Select>
-          <p className='hidden text-sm font-medium sm:block'>
+          <label
+            htmlFor='linhas-por-pagina'
+            className='text-sm font-medium max-sm:sr-only'
+          >
             Linhas por página
-          </p>
+          </label>
         </div>
       </div>
 
       <div className='flex items-center sm:space-x-6 lg:space-x-8'>
-        <div className='flex w-25 items-center justify-center text-sm font-medium @max-3xl/content:hidden'>
+        <div className='flex w-25 items-center justify-center text-sm font-medium @max-2xl/content:hidden'>
           Página {currentPage} de {totalPages}
         </div>
         <div className='flex items-center space-x-2'>

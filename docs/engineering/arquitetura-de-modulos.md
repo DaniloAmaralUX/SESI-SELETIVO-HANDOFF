@@ -80,7 +80,7 @@ external** (terceiro — mock).
 
 ### 3.1 Entidade & schema da Vaga — *in-process*
 Novo `src/features/vagas/data/schema.ts` com o **schema Zod da `Vaga`**, incluindo os **dois eixos** como
-enums (`Status` com 6 valores, `Ação atual` com 10 etapas — ADR [0001](../adr/0001-status-e-acao-como-eixos-independentes.md)).
+enums (`Status` com 7 valores, `Ação atual` com 10 etapas — ADR [0001](../adr/0001-status-e-acao-como-eixos-independentes.md)).
 Esse schema é a **fonte única**: a rota (`validateSearch`) e as colunas da tabela importam dele. Espelha o
 padrão que o template já usa (`tasks/index.tsx` importa `statuses`/`priorities` do `data/` da feature).
 

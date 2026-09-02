@@ -13,8 +13,8 @@ processo seletivo — do recebimento da solicitação ao encerramento — com fo
 
 A entidade central é a **Vaga**. Toda Vaga tem, **simultaneamente**, dois eixos independentes:
 
-- **Status** — a *situação* da Vaga (Aberta · Suspensa · Congelada · Cancelada · Finalizada · Arquivada).
-  Controla o **cronômetro de SLA**.
+- **Status** — a *situação* da Vaga (Rascunho · Aberta · Suspensa · Congelada · Cancelada · Finalizada ·
+  Arquivada). Controla o **cronômetro de SLA**, que só começa a correr quando a vaga deixa de ser rascunho.
 - **Ação atual** — a *etapa* no processo seletivo (Solicitação recebida → … → Admissão, 10 etapas ordenadas).
 
 O **SLA** pertence exclusivamente à Vaga (meta de **20 dias úteis**, pausa em Suspensa/Congelada). O
