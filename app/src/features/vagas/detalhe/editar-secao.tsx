@@ -180,7 +180,7 @@ export function EditarGestorJuridico({ vaga }: { vaga: Vaga }) {
       }}
     >
       {(form) => (
-        <div className='grid gap-4 sm:grid-cols-2'>
+        <div className='grid items-start gap-4 sm:grid-cols-2'>
           <CampoData
             form={form}
             name='dataEncaminhamentoGestor'
@@ -251,7 +251,7 @@ export function EditarCronograma({ vaga }: { vaga: Vaga }) {
       }}
     >
       {(form) => (
-        <div className='grid gap-4 sm:grid-cols-2'>
+        <div className='grid items-start gap-4 sm:grid-cols-2'>
           <CampoData
             form={form}
             name='inscricoesInicio'
@@ -320,7 +320,7 @@ export function EditarResultado({
       }}
     >
       {(form) => (
-        <div className='grid gap-4 sm:grid-cols-2'>
+        <div className='grid items-start gap-4 sm:grid-cols-2'>
           <CampoData
             form={form}
             name='divulgacaoResultado'

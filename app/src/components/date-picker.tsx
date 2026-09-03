@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar as CalendarIcon, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -21,6 +22,8 @@ type DatePickerProps = {
   desabilitarFuturo?: boolean
   // Campos opcionais podem ser limpos sem reabrir o calendário
   limpavel?: boolean
+  // Ajustes de layout no trigger (ex.: altura no grid de 8px do form)
+  className?: string
 }
 
 export function DatePicker({
@@ -31,6 +34,7 @@ export function DatePicker({
   'aria-labelledby': ariaLabelledby,
   desabilitarFuturo = false,
   limpavel = false,
+  className,
 }: DatePickerProps) {
   return (
     <div className='relative'>
@@ -42,7 +46,10 @@ export function DatePicker({
             id={id}
             aria-labelledby={ariaLabelledby}
             data-empty={!selected}
-            className='w-full justify-start text-start font-normal data-[empty=true]:text-muted-foreground'
+            className={cn(
+              'w-full justify-start text-start font-normal data-[empty=true]:text-muted-foreground',
+              className
+            )}
           >
             {selected ? (
               format(selected, 'dd/MM/yyyy', { locale: ptBR })

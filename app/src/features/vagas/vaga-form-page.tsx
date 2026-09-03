@@ -21,7 +21,12 @@ function Chrome({ children }: { children: React.ReactNode }) {
         <ConfigDrawer />
         <ProfileDropdown />
       </Header>
-      <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>{children}</Main>
+      <Main className='flex flex-1 flex-col'>
+        {/* Coluna de leitura: 768px (grid de 8) centralizada no container */}
+        <div className='mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6'>
+          {children}
+        </div>
+      </Main>
     </>
   )
 }
@@ -30,16 +35,21 @@ export function NovaVagaPage() {
   return (
     <Chrome>
       <div>
-        <Button variant='ghost' size='sm' asChild>
+        <Button
+          variant='ghost'
+          size='sm'
+          className='-ms-3 text-muted-foreground'
+          asChild
+        >
           <Link to='/vagas'>
             <ArrowLeft className='size-4' />
             Voltar para vagas
           </Link>
         </Button>
       </div>
-      <div>
+      <div className='space-y-2'>
         <h1 className='text-2xl font-bold tracking-tight'>Nova vaga</h1>
-        <p className='text-muted-foreground'>
+        <p className='text-pretty text-muted-foreground'>
           A vaga é criada como Rascunho. O prazo (SLA) começa a contar quando
           você muda o status para Aberta.
         </p>
@@ -58,7 +68,12 @@ export function EditarVagaPage() {
   return (
     <Chrome>
       <div>
-        <Button variant='ghost' size='sm' asChild>
+        <Button
+          variant='ghost'
+          size='sm'
+          className='-ms-3 text-muted-foreground'
+          asChild
+        >
           <Link to='/vagas/$vagaId' params={{ vagaId }} disabled={!vaga}>
             <ArrowLeft className='size-4' />
             Voltar para a vaga
@@ -67,9 +82,9 @@ export function EditarVagaPage() {
       </div>
       {vaga ? (
         <>
-          <div>
+          <div className='space-y-2'>
             <h1 className='text-2xl font-bold tracking-tight'>Editar vaga</h1>
-            <p className='text-muted-foreground'>
+            <p className='text-pretty text-muted-foreground'>
               Chamado {vaga.chamado} · {vaga.cargo}
             </p>
           </div>

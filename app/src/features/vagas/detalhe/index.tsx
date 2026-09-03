@@ -248,7 +248,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Chamado'>{vaga.chamado}</CampoLinha>
                 <CampoLinha label='Código da vaga'>
                   {vaga.codigoVaga}
@@ -285,7 +285,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Gestor solicitante'>
                   {vaga.gestorSolicitante}
                 </CampoLinha>
@@ -302,7 +302,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Cargo'>{vaga.cargo}</CampoLinha>
                 <CampoLinha label='Nível'>{vaga.nivel}</CampoLinha>
                 <CampoLinha label='Função'>{vaga.funcao}</CampoLinha>
@@ -352,7 +352,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4'>
                 <CampoLinha label='Início das inscrições'>
                   {formatarData(vaga.inscricoesInicio)}
                 </CampoLinha>
@@ -396,7 +396,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Encaminhada ao gestor'>
                   {formatarData(vaga.dataEncaminhamentoGestor)}
                 </CampoLinha>
@@ -420,7 +420,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4'>
                 <CampoLinha label='Chamado jurídico'>
                   {vaga.chamadoJuridico}
                 </CampoLinha>
@@ -455,7 +455,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <dl className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                 <CampoLinha label='Divulgação do resultado'>
                   {formatarData(vaga.divulgacaoResultado)}
                 </CampoLinha>
@@ -500,7 +500,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
             <CardContent className='space-y-6'>
               <HistoricoTimeline eventos={vaga.historico ?? []} />
               {/* Auditoria (RF17) */}
-              <dl className='grid gap-4 border-t pt-4 sm:grid-cols-2'>
+              <dl className='grid items-start gap-4 border-t pt-4 sm:grid-cols-2'>
                 <CampoLinha label='Criada por'>
                   {vaga.criadoPor &&
                     `${vaga.criadoPor} · ${formatarData(vaga.criadoEm)}`}
