@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, format } from 'date-fns'
+import { format } from 'date-fns'
 import { Link, useParams } from '@tanstack/react-router'
 import { ptBR } from 'date-fns/locale'
 import { ArrowLeft, Pencil, RotateCcw } from 'lucide-react'
@@ -28,13 +28,19 @@ import { PapelSwitcher } from '@/components/papel-switcher'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { MudarAcao } from '../components/acoes/mudar-acao'
+import { MudarStatus } from '../components/acoes/mudar-status'
 import { SlaIndicator } from '../components/sla-indicator'
 import { StatusBadge } from '../components/status-badge'
 import { acaoOptions } from '../data/data'
 import { type Vaga } from '../data/schema'
 import { useVaga } from '../data/vagas-store'
 import { podeVerDadosSensiveis, usePapel } from '../lib/papel'
-import { slaDaVaga, tempoDoGestorDiasUteis } from '../lib/sla-vaga'
+import {
+  slaDaVaga,
+  tempoDoGestorDiasUteis,
+  tempoDoJuridicoDiasUteis,
+} from '../lib/sla-vaga'
 import { AcaoStepper } from './acao-stepper'
 import { CampoLinha } from './campo-linha'
 import { CampoSensivel } from './campo-sensivel'
@@ -44,8 +50,7 @@ import {
   EditarResultado,
 } from './editar-secao'
 import { HistoricoTimeline } from './historico-timeline'
-import { MudarAcao } from './mudar-acao'
-import { MudarStatus } from './mudar-status'
+import { ObservacoesEtapas } from './observacoes-etapas'
 
 const ORIGEM_LABELS: Record<Vaga['origemDoCadastro'], string> = {
   manual: 'Manual',
@@ -74,14 +79,7 @@ function formatarBool(valor?: boolean): string | undefined {
   return valor ? 'Sim' : 'Não'
 }
 
-// Duração em dias corridos entre duas datas — só quando ambas existem
-function duracaoEmDias(inicio?: Date, fim?: Date): string | undefined {
-  if (!inicio || !fim) return undefined
-  const dias = differenceInCalendarDays(fim, inicio)
-  return `${dias} ${dias === 1 ? 'dia' : 'dias'}`
-}
-
-// Medição do gestor em dias ÚTEIS (B2); "em andamento" enquanto não há retorno
+// Medições em dias ÚTEIS (B2); "em andamento" enquanto não há data de fim
 function formatarDiasUteis(
   dias: number | undefined,
   emAndamento: boolean
@@ -174,7 +172,12 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 {acao.label}
               </Badge>
             )}
-            <SlaIndicator diasUteis={slaDaVaga(vaga)} />
+            <SlaIndicator
+              diasUteis={slaDaVaga(vaga)}
+              encerrada={['finalizada', 'cancelada', 'arquivada'].includes(
+                vaga.status
+              )}
+            />
           </div>
         </div>
         <div className='flex items-center gap-2'>
@@ -195,6 +198,7 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
           <TabsTrigger value='processo'>Processo</TabsTrigger>
           <TabsTrigger value='gestor-juridico'>Gestor & Jurídico</TabsTrigger>
           <TabsTrigger value='resultado'>Resultado & Candidato</TabsTrigger>
+          <TabsTrigger value='observacoes'>Observações</TabsTrigger>
           <TabsTrigger value='historico'>Histórico</TabsTrigger>
         </TabsList>
 
@@ -228,6 +232,12 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 <CampoLinha label='Chamado'>{vaga.chamado}</CampoLinha>
                 <CampoLinha label='Código da vaga'>
                   {vaga.codigoVaga}
+                </CampoLinha>
+                {/* Somente leitura: vínculo criado na reabertura (ou '—') */}
+                <CampoLinha label='Código da vaga de origem'>
+                  {vaga.reaberturaDe
+                    ? (vagaOrigem?.codigoVaga ?? vaga.reaberturaDe)
+                    : undefined}
                 </CampoLinha>
                 <CampoLinha label='Data de recebimento'>
                   {formatarData(vaga.dataRecebimento)}
@@ -343,8 +353,8 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
         </TabsContent>
 
         {/* Tempo do gestor e Tempo do jurídico são MEDIÇÕES, não SLAs
-            (CONTEXT.md). Gestor mede em dias ÚTEIS (B2); jurídico, em
-            dias corridos. */}
+            (CONTEXT.md). Ambos medem em dias ÚTEIS (regra revisada com a
+            cliente em set/2026 — antes o jurídico corria em dias corridos). */}
         <TabsContent value='gestor-juridico' className='space-y-4'>
           <Card>
             <CardHeader>
@@ -386,10 +396,10 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
                 <CampoLinha label='Recebimento do parecer'>
                   {formatarData(vaga.recebimentoParecerJuridico)}
                 </CampoLinha>
-                <CampoLinha label='Duração (dias corridos)'>
-                  {duracaoEmDias(
-                    vaga.aberturaChamadoJuridico,
-                    vaga.recebimentoParecerJuridico
+                <CampoLinha label='Duração (dias úteis)'>
+                  {formatarDiasUteis(
+                    tempoDoJuridicoDiasUteis(vaga),
+                    !vaga.recebimentoParecerJuridico
                   )}
                 </CampoLinha>
               </dl>
@@ -438,6 +448,11 @@ function DetalheConteudo({ vaga }: { vaga: Vaga }) {
               </dl>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Observações por etapa (ajuste da cliente): timeline imutável */}
+        <TabsContent value='observacoes'>
+          <ObservacoesEtapas vaga={vaga} />
         </TabsContent>
 
         <TabsContent value='historico'>

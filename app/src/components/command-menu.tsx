@@ -29,11 +29,18 @@ export function CommandMenu() {
   )
 
   return (
-    <CommandDialog modal open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder='Type a command or search...' />
+    <CommandDialog
+      modal
+      open={open}
+      onOpenChange={setOpen}
+      // Título/descrição sr-only do dialog vêm em inglês no ui/command — PT aqui
+      title='Menu de comando'
+      description='Busque um comando ou navegue pelo sistema'
+    >
+      <CommandInput placeholder='Digite um comando ou busque...' />
       <CommandList>
         <ScrollArea type='hover' className='h-72 pe-1'>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           {sidebarData.navGroups.map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
@@ -71,17 +78,17 @@ export function CommandMenu() {
             </CommandGroup>
           ))}
           <CommandSeparator />
-          <CommandGroup heading='Theme'>
+          <CommandGroup heading='Tema'>
             <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
-              <Sun /> <span>Light</span>
+              <Sun /> <span>Claro</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
               <Moon className='scale-90' />
-              <span>Dark</span>
+              <span>Escuro</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setTheme('system'))}>
               <Laptop />
-              <span>System</span>
+              <span>Sistema</span>
             </CommandItem>
           </CommandGroup>
         </ScrollArea>

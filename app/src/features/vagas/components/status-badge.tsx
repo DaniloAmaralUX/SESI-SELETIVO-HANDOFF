@@ -5,6 +5,7 @@ import { type StatusVaga } from '../data/schema'
 
 // Mapa estático — o Tailwind só gera classes escritas por extenso
 const statusBgClass: Record<StatusVaga, string> = {
+  rascunho: 'bg-status-rascunho',
   aberta: 'bg-status-aberta',
   suspensa: 'bg-status-suspensa',
   congelada: 'bg-status-congelada',

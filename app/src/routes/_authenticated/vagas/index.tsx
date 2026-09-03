@@ -11,6 +11,11 @@ const vagasSearchSchema = z.object({
   area: z.array(z.string()).optional().catch([]),
   recrutadora: z.array(z.string()).optional().catch([]),
   gestor: z.array(z.string()).optional().catch([]),
+  // Período de abertura (yyyy-MM-dd) — URL compartilhável reproduz o recorte
+  periodo: z
+    .object({ de: z.string().optional(), ate: z.string().optional() })
+    .optional()
+    .catch(undefined),
   page: z.number().optional().catch(1),
   pageSize: z.number().optional().catch(10),
 })

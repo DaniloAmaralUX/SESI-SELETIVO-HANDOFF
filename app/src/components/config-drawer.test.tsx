@@ -29,10 +29,10 @@ async function renderConfigDrawer({
 
 async function openDrawer(screen: RenderResult) {
   await userEvent.click(
-    screen.getByRole('button', { name: /^Open theme settings$/i })
+    screen.getByRole('button', { name: /^Abrir preferências de aparência$/i })
   )
   await expect
-    .element(screen.getByText(/^Theme Settings$/i))
+    .element(screen.getByText(/^Preferências de aparência$/i))
     .toBeInTheDocument()
 }
 
@@ -51,20 +51,24 @@ describe('ConfigDrawer (integration)', () => {
 
     await openDrawer(screen)
 
-    const drawer = screen.getByRole('dialog', { name: /theme settings/i })
+    const drawer = screen.getByRole('dialog', {
+      name: /preferências de aparência/i,
+    })
 
     await expect.element(drawer).toBeInTheDocument()
 
-    await expect.element(drawer.getByText(/^Theme$/i)).toBeInTheDocument()
+    await expect.element(drawer.getByText(/^Tema$/i)).toBeInTheDocument()
     await expect.element(drawer.getByText(/^Layout$/i)).toBeInTheDocument()
     await expect
-      .element(drawer.getByText(/^Sidebar$/i).first())
+      .element(drawer.getByText(/^Barra lateral$/i).first())
       .toBeInTheDocument()
-    await expect.element(drawer.getByText(/^Direction$/i)).toBeInTheDocument()
+    await expect
+      .element(drawer.getByText(/^Direção do texto$/i))
+      .toBeInTheDocument()
     await expect
       .element(
         screen.getByRole('button', {
-          name: /reset all settings to default values/i,
+          name: /restaurar todas as preferências/i,
         })
       )
       .toBeInTheDocument()
@@ -74,9 +78,7 @@ describe('ConfigDrawer (integration)', () => {
     it('applies light theme to <html> and cookie', async () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select light/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Claro$/i }))
       await vi.waitFor(() =>
         expect(document.documentElement.classList.contains('light')).toBe(true)
       )
@@ -86,7 +88,7 @@ describe('ConfigDrawer (integration)', () => {
     it('applies dark theme to <html> and cookie', async () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
-      await userEvent.click(screen.getByRole('radio', { name: /select dark/i }))
+      await userEvent.click(screen.getByRole('radio', { name: /^Escuro$/i }))
       await vi.waitFor(() =>
         expect(document.documentElement.classList.contains('dark')).toBe(true)
       )
@@ -100,9 +102,7 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select system/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Sistema$/i }))
       await vi.waitFor(() => expect(getCookie('vite-ui-theme')).toBe('system'))
       await vi.waitFor(() => {
         const root = document.documentElement
@@ -118,9 +118,7 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select floating/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Flutuante$/i }))
       await vi.waitFor(() =>
         expect(getCookie('layout_variant')).toBe('floating')
       )
@@ -131,7 +129,9 @@ describe('ConfigDrawer (integration)', () => {
       await openDrawer(screen)
 
       await userEvent.click(
-        screen.getByRole('radio', { name: /^select sidebar$/i })
+        screen
+          .getByRole('radiogroup', { name: /estilo da barra lateral/i })
+          .getByRole('radio', { name: /^Padrão$/i })
       )
       await vi.waitFor(() =>
         expect(getCookie('layout_variant')).toBe('sidebar')
@@ -142,16 +142,12 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select floating/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Flutuante$/i }))
       await vi.waitFor(() =>
         expect(getCookie('layout_variant')).toBe('floating')
       )
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select inset/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Embutida$/i }))
       await vi.waitFor(() => expect(getCookie('layout_variant')).toBe('inset'))
     })
   })
@@ -160,9 +156,7 @@ describe('ConfigDrawer (integration)', () => {
     const screen = await renderConfigDrawer({ sidebarDefaultOpen: true })
     await openDrawer(screen)
 
-    await userEvent.click(
-      screen.getByRole('radio', { name: /select full layout/i })
-    )
+    await userEvent.click(screen.getByRole('radio', { name: /^Tela cheia$/i }))
     await vi.waitFor(() =>
       expect(getCookie('layout_collapsible')).toBe('offcanvas')
     )
@@ -174,12 +168,12 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
 
-      await userEvent.click(screen.getByRole('radio', { name: /select dark/i }))
+      await userEvent.click(screen.getByRole('radio', { name: /^Escuro$/i }))
       await vi.waitFor(() => expect(getCookie('vite-ui-theme')).toBe('dark'))
 
       await userEvent.click(
         screen.getByRole('button', {
-          name: /reset theme preference to default/i,
+          name: /restaurar tema padrão/i,
         })
       )
       await vi.waitFor(() => expect(getCookie('vite-ui-theme')).toBe('system'))
@@ -190,7 +184,7 @@ describe('ConfigDrawer (integration)', () => {
       await openDrawer(screen)
 
       await userEvent.click(
-        screen.getByRole('radio', { name: /select right to left/i })
+        screen.getByRole('radio', { name: /^Da direita para a esquerda$/i })
       )
       await vi.waitFor(() =>
         expect(document.documentElement.getAttribute('dir')).toBe('rtl')
@@ -198,7 +192,7 @@ describe('ConfigDrawer (integration)', () => {
 
       await userEvent.click(
         screen.getByRole('button', {
-          name: /reset text direction to default/i,
+          name: /restaurar direção padrão do texto/i,
         })
       )
       await vi.waitFor(() =>
@@ -211,16 +205,14 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer()
       await openDrawer(screen)
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select floating/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Flutuante$/i }))
       await vi.waitFor(() =>
         expect(getCookie('layout_variant')).toBe('floating')
       )
 
       await userEvent.click(
         screen.getByRole('button', {
-          name: /reset sidebar style to default/i,
+          name: /restaurar estilo padrão da barra lateral/i,
         })
       )
       await vi.waitFor(() => expect(getCookie('layout_variant')).toBe('inset'))
@@ -230,14 +222,12 @@ describe('ConfigDrawer (integration)', () => {
       const screen = await renderConfigDrawer({ sidebarDefaultOpen: true })
       await openDrawer(screen)
 
-      await userEvent.click(
-        screen.getByRole('radio', { name: /select compact/i })
-      )
+      await userEvent.click(screen.getByRole('radio', { name: /^Compacto$/i }))
       await vi.waitFor(() => expect(getCookie('sidebar_state')).toBe('false'))
 
       await userEvent.click(
         screen.getByRole('button', {
-          name: /reset layout options to default/i,
+          name: /restaurar layout padrão/i,
         })
       )
       await vi.waitFor(() => expect(getCookie('sidebar_state')).toBe('true'))
@@ -253,7 +243,7 @@ describe('ConfigDrawer (integration)', () => {
     await openDrawer(screen)
 
     await userEvent.click(
-      screen.getByRole('radio', { name: /select right to left/i })
+      screen.getByRole('radio', { name: /^Da direita para a esquerda$/i })
     )
     await vi.waitFor(() =>
       expect(document.documentElement.getAttribute('dir')).toBe('rtl')
@@ -267,12 +257,14 @@ describe('ConfigDrawer (integration)', () => {
     await openDrawer(screen)
 
     await expect
-      .element(screen.getByRole('radio', { name: /select default/i }))
+      .element(
+        screen
+          .getByRole('radiogroup', { name: /estilo do layout/i })
+          .getByRole('radio', { name: /^Padrão$/i })
+      )
       .toHaveAttribute('data-state', 'checked')
 
-    await userEvent.click(
-      screen.getByRole('radio', { name: /select compact/i })
-    )
+    await userEvent.click(screen.getByRole('radio', { name: /^Compacto$/i }))
 
     await vi.waitFor(() => expect(getCookie('sidebar_state')).toBe('false'))
     await vi.waitFor(() => expect(getCookie('layout_collapsible')).toBe('icon'))
@@ -283,16 +275,12 @@ describe('ConfigDrawer (integration)', () => {
 
     await openDrawer(screen)
 
-    await userEvent.click(screen.getByRole('radio', { name: /select dark/i }))
+    await userEvent.click(screen.getByRole('radio', { name: /^Escuro$/i }))
     await userEvent.click(
-      screen.getByRole('radio', { name: /select right to left/i })
+      screen.getByRole('radio', { name: /^Da direita para a esquerda$/i })
     )
-    await userEvent.click(
-      screen.getByRole('radio', { name: /select floating/i })
-    )
-    await userEvent.click(
-      screen.getByRole('radio', { name: /select full layout/i })
-    )
+    await userEvent.click(screen.getByRole('radio', { name: /^Flutuante$/i }))
+    await userEvent.click(screen.getByRole('radio', { name: /^Tela cheia$/i }))
 
     await vi.waitFor(() => expect(getCookie('vite-ui-theme')).toBe('dark'))
     await vi.waitFor(() => expect(getCookie('dir')).toBe('rtl'))
@@ -303,7 +291,7 @@ describe('ConfigDrawer (integration)', () => {
 
     await userEvent.click(
       screen.getByRole('button', {
-        name: /reset all settings to default values/i,
+        name: /restaurar todas as preferências/i,
       })
     )
 

@@ -45,6 +45,15 @@ type UseTableUrlStateParams = {
         serialize?: (value: unknown) => unknown
         deserialize?: (value: unknown) => unknown
       }
+    | {
+        // Valor de forma livre (ex.: período {de, ate}) — presença decidida
+        // por null/undefined; transformers obrigatórios
+        columnId: string
+        searchKey: string
+        type: 'custom'
+        serialize: (value: unknown) => unknown
+        deserialize: (value: unknown) => unknown
+      }
   >
 }
 
@@ -91,7 +100,12 @@ export function useTableUrlState(
     for (const cfg of columnFiltersCfg) {
       const raw = (search as SearchRecord)[cfg.searchKey]
       const deserialize = cfg.deserialize ?? ((v: unknown) => v)
-      if (cfg.type === 'string') {
+      if (cfg.type === 'custom') {
+        const value = raw == null ? undefined : deserialize(raw)
+        if (value != null) {
+          collected.push({ id: cfg.columnId, value })
+        }
+      } else if (cfg.type === 'string') {
         const value = (deserialize(raw) as string) ?? ''
         if (typeof value === 'string' && value.trim() !== '') {
           collected.push({ id: cfg.columnId, value })
@@ -168,7 +182,10 @@ export function useTableUrlState(
     for (const cfg of columnFiltersCfg) {
       const found = next.find((f) => f.id === cfg.columnId)
       const serialize = cfg.serialize ?? ((v: unknown) => v)
-      if (cfg.type === 'string') {
+      if (cfg.type === 'custom') {
+        patch[cfg.searchKey] =
+          found?.value != null ? serialize(found.value) : undefined
+      } else if (cfg.type === 'string') {
         const value =
           typeof found?.value === 'string' ? (found.value as string) : ''
         patch[cfg.searchKey] =

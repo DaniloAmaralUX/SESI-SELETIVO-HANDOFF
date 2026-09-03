@@ -7,6 +7,7 @@ import {
   Pencil,
   PlusCircle,
   RefreshCw,
+  MessageSquareText,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -24,6 +25,7 @@ const ICONE_POR_TIPO: Record<EventoHistorico['tipo'], LucideIcon> = {
   'mudanca-status': RefreshCw,
   'mudanca-acao': ArrowRight,
   importacao: FileUp,
+  observacao: MessageSquareText,
 }
 
 // Trilha de alterações da Vaga (RF16/RF17): quem fez o quê e quando, do mais

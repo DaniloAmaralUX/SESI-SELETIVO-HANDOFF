@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableDateRangeFilter } from './date-range-filter'
 import { DataTableFacetedFilter } from './faceted-filter'
+import { DataTableFiltersSheet } from './filters-sheet'
 import { DataTableViewOptions } from './view-options'
 
 type DataTableToolbarProps<TData> = {
@@ -35,10 +36,12 @@ export function DataTableToolbar<TData>({
     table.getState().columnFilters.length > 0 || table.getState().globalFilter
 
   return (
-    <div className='flex items-center justify-between'>
-      <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
+    <div className='flex flex-wrap items-center justify-between gap-2'>
+      <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4'>
         {searchKey ? (
           <Input
+            type='search'
+            aria-label={searchPlaceholder}
             placeholder={searchPlaceholder}
             value={
               (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
@@ -46,17 +49,32 @@ export function DataTableToolbar<TData>({
             onChange={(event) =>
               table.getColumn(searchKey)?.setFilterValue(event.target.value)
             }
-            className='h-8 w-37.5 lg:w-62.5'
+            // Mobile: largura cheia — campo estreito clipava o placeholder e
+            // criava borda solta no layout (better-layout: plan for growth)
+            className='h-8 w-full sm:w-37.5 lg:w-62.5'
           />
         ) : (
           <Input
+            type='search'
+            aria-label={searchPlaceholder}
             placeholder={searchPlaceholder}
             value={table.getState().globalFilter ?? ''}
             onChange={(event) => table.setGlobalFilter(event.target.value)}
-            className='h-8 w-37.5 lg:w-62.5'
+            className='h-8 w-full sm:w-37.5 lg:w-62.5'
           />
         )}
-        <div className='flex flex-wrap gap-2'>
+        {/* <md os chips empilhavam 1/linha e empurravam a tabela p/ fora da
+            dobra — viram um único botão "Filtros (n)" com Sheet */}
+        {(filters.length > 0 || dateRangeFilters.length > 0) && (
+          <div className='md:hidden'>
+            <DataTableFiltersSheet
+              table={table}
+              filters={filters}
+              dateRangeFilters={dateRangeFilters}
+            />
+          </div>
+        )}
+        <div className='hidden flex-wrap gap-2 md:flex'>
           {filters.map((filter) => {
             const column = table.getColumn(filter.columnId)
             if (!column) return null
@@ -90,7 +108,7 @@ export function DataTableToolbar<TData>({
             }}
             className='h-8 px-2 lg:px-3'
           >
-            Limpar
+            Limpar filtros
             <Cross2Icon className='ms-2 h-4 w-4' />
           </Button>
         )}

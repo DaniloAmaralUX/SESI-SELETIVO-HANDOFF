@@ -40,7 +40,8 @@ export function NovaVagaPage() {
       <div>
         <h2 className='text-2xl font-bold tracking-tight'>Nova vaga</h2>
         <p className='text-muted-foreground'>
-          A vaga nasce com status Aberta e o SLA começa a contar.
+          A vaga é criada como Rascunho. O prazo (SLA) começa a contar quando
+          você muda o status para Aberta.
         </p>
       </div>
       <VagaForm mode='criar' />

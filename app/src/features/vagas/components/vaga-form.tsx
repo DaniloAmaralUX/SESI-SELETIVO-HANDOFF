@@ -1,12 +1,15 @@
+import { type ReactNode } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
+import { useGuardaForm } from '@/hooks/use-guarda-form'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,7 +32,7 @@ import {
   type VagaCreateInput,
   type VagaEditInput,
 } from '../data/schema'
-import { useVagasStore } from '../data/vagas-store'
+import { useVaga, useVagasStore } from '../data/vagas-store'
 import { labelDoPapel, usePapel } from '../lib/papel'
 
 // Opções dos campos enum. Strings livres (unidade, área, cargo, gestor,
@@ -48,6 +51,42 @@ const nivelOptions = ['I', 'II', 'III', 'IV', 'V', 'VI'] as const
 
 // Sentinela para "limpar" o nível — Radix Select não aceita value vazio.
 const NIVEL_NENHUM = '__nenhum__'
+
+// Descrição do campo somente leitura "Código da vaga de origem"
+const DESC_ORIGEM_AUTOMATICA =
+  'Preenchido automaticamente quando a vaga é uma reabertura.'
+
+// Rótulo com marcador de obrigatório (B5) + anúncio para leitor de tela.
+function Rotulo({
+  obrigatorio = false,
+  children,
+}: {
+  obrigatorio?: boolean
+  children: ReactNode
+}) {
+  return (
+    <FormLabel className='gap-1'>
+      {children}
+      {obrigatorio && (
+        <>
+          <span className='text-destructive' aria-hidden='true'>
+            *
+          </span>
+          <span className='sr-only'>(obrigatório)</span>
+        </>
+      )}
+    </FormLabel>
+  )
+}
+
+function NotaObrigatorios() {
+  return (
+    <p className='text-sm text-muted-foreground'>
+      Campos marcados com <span className='text-destructive'>*</span> são
+      obrigatórios.
+    </p>
+  )
+}
 
 export function VagaForm(
   props: { mode: 'criar' } | { mode: 'editar'; vaga: Vaga }
@@ -84,25 +123,36 @@ function CriarForm() {
     },
   })
 
+  const { dialogoDescarte } = useGuardaForm(form.formState.isDirty)
+
   function onSubmit(values: VagaCreateInput) {
     const vaga = criar(values, labelDoPapel(papel))
     toast.success(`Vaga ${vaga.chamado} criada`)
+    // Limpa o isDirty ANTES de navegar — senão o guard de descarte dispara
+    // no redirecionamento de sucesso
+    form.reset(undefined, { keepValues: true })
     navigate({ to: '/vagas/$vagaId', params: { vagaId: vaga.id } })
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <NotaObrigatorios />
         <div className='grid gap-4 sm:grid-cols-2'>
           <FormField
             control={form.control}
             name='chamado'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nº do chamado</FormLabel>
+                <Rotulo obrigatorio>Nº do chamado</Rotulo>
                 <FormControl>
                   <Input placeholder='Ex.: CH-500123' {...field} />
                 </FormControl>
+                {/* B5: obrigatoriedade condicional — o refine do schema
+                    deposita o erro neste campo (path: ['chamado']) */}
+                <FormDescription>
+                  Informe o Nº do chamado ou o Código da vaga (pelo menos um).
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -112,7 +162,7 @@ function CriarForm() {
             name='codigoVaga'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Código da vaga</FormLabel>
+                <Rotulo obrigatorio>Código da vaga</Rotulo>
                 <FormControl>
                   <Input placeholder='Ex.: VG-2026-001' {...field} />
                 </FormControl>
@@ -120,12 +170,25 @@ function CriarForm() {
               </FormItem>
             )}
           />
+          {/* Somente leitura (fora do form state): vínculo de reabertura */}
+          <FormItem>
+            <Rotulo>Código da vaga de origem</Rotulo>
+            <FormControl>
+              <Input
+                value='—'
+                readOnly
+                aria-readonly='true'
+                className='bg-muted text-muted-foreground'
+              />
+            </FormControl>
+            <FormDescription>{DESC_ORIGEM_AUTOMATICA}</FormDescription>
+          </FormItem>
           <FormField
             control={form.control}
             name='gestorSolicitante'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gestor solicitante</FormLabel>
+                <Rotulo obrigatorio>Gestor solicitante</Rotulo>
                 <FormControl>
                   <Input placeholder='Nome do gestor' {...field} />
                 </FormControl>
@@ -138,7 +201,7 @@ function CriarForm() {
             name='unidade'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unidade</FormLabel>
+                <Rotulo obrigatorio>Unidade</Rotulo>
                 <FormControl>
                   <Input placeholder='Ex.: SESI Centro' {...field} />
                 </FormControl>
@@ -151,7 +214,7 @@ function CriarForm() {
             name='area'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Área</FormLabel>
+                <Rotulo obrigatorio>Área</Rotulo>
                 <FormControl>
                   <Input placeholder='Ex.: Educação' {...field} />
                 </FormControl>
@@ -164,7 +227,7 @@ function CriarForm() {
             name='cargo'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cargo</FormLabel>
+                <Rotulo obrigatorio>Cargo</Rotulo>
                 <FormControl>
                   <Input placeholder='Ex.: Analista de RH' {...field} />
                 </FormControl>
@@ -177,7 +240,7 @@ function CriarForm() {
             name='tipoContrato'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de contrato</FormLabel>
+                <Rotulo obrigatorio>Tipo de contrato</Rotulo>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -244,7 +307,7 @@ function CriarForm() {
             name='recrutadora'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Recrutadora</FormLabel>
+                <Rotulo obrigatorio>Recrutadora</Rotulo>
                 <FormControl>
                   <Input placeholder='Nome da recrutadora' {...field} />
                 </FormControl>
@@ -257,7 +320,7 @@ function CriarForm() {
             name='dataAbertura'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de abertura</FormLabel>
+                <Rotulo obrigatorio>Data de abertura</Rotulo>
                 <FormControl>
                   <DatePicker
                     selected={field.value}
@@ -344,6 +407,7 @@ function CriarForm() {
             Cancelar
           </Button>
         </div>
+        {dialogoDescarte}
       </form>
     </Form>
   )
@@ -353,6 +417,8 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
   const navigate = useNavigate()
   const atualizar = useVagasStore((s) => s.atualizar)
   const papel = usePapel()
+  // Origem da reabertura — só existe quando a vaga é um novo registro vinculado
+  const vagaOrigem = useVaga(vaga.reaberturaDe ?? '')
 
   const form = useForm<VagaEditInput>({
     resolver: zodResolver(vagaEditSchema) as Resolver<VagaEditInput>,
@@ -375,22 +441,28 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
     },
   })
 
+  const { dialogoDescarte } = useGuardaForm(form.formState.isDirty)
+
   function onSubmit(values: VagaEditInput) {
     atualizar(vaga.id, values, labelDoPapel(papel))
     toast.success('Alterações salvas')
+    // Limpa o isDirty ANTES de navegar — senão o guard de descarte dispara
+    // no redirecionamento de sucesso
+    form.reset(undefined, { keepValues: true })
     navigate({ to: '/vagas/$vagaId', params: { vagaId: vaga.id } })
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <NotaObrigatorios />
         <div className='grid gap-4 sm:grid-cols-2'>
           <FormField
             control={form.control}
             name='chamado'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nº do chamado</FormLabel>
+                <Rotulo obrigatorio>Nº do chamado</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Ex.: CH-500123'
@@ -398,6 +470,9 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
                     value={field.value ?? ''}
                   />
                 </FormControl>
+                <FormDescription>
+                  Informe o Nº do chamado ou o Código da vaga (pelo menos um).
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -407,7 +482,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='codigoVaga'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Código da vaga</FormLabel>
+                <Rotulo obrigatorio>Código da vaga</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Ex.: VG-2026-001'
@@ -419,12 +494,30 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
               </FormItem>
             )}
           />
+          {/* Somente leitura (fora do form state) — vínculo de reabertura não
+              é editável */}
+          <FormItem>
+            <Rotulo>Código da vaga de origem</Rotulo>
+            <FormControl>
+              <Input
+                value={vagaOrigem?.codigoVaga ?? vaga.reaberturaDe ?? '—'}
+                readOnly
+                aria-readonly='true'
+                className='bg-muted text-muted-foreground'
+              />
+            </FormControl>
+            <FormDescription>
+              {vaga.reaberturaDe
+                ? 'Vínculo criado na reabertura — não editável.'
+                : DESC_ORIGEM_AUTOMATICA}
+            </FormDescription>
+          </FormItem>
           <FormField
             control={form.control}
             name='gestorSolicitante'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gestor solicitante</FormLabel>
+                <Rotulo obrigatorio>Gestor solicitante</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Nome do gestor'
@@ -441,7 +534,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='unidade'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unidade</FormLabel>
+                <Rotulo obrigatorio>Unidade</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Ex.: SESI Centro'
@@ -458,7 +551,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='area'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Área</FormLabel>
+                <Rotulo obrigatorio>Área</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Ex.: Educação'
@@ -475,7 +568,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='cargo'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cargo</FormLabel>
+                <Rotulo obrigatorio>Cargo</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Ex.: Analista de RH'
@@ -492,7 +585,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='tipoContrato'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de contrato</FormLabel>
+                <Rotulo obrigatorio>Tipo de contrato</Rotulo>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -563,7 +656,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='recrutadora'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Recrutadora</FormLabel>
+                <Rotulo obrigatorio>Recrutadora</Rotulo>
                 <FormControl>
                   <Input
                     placeholder='Nome da recrutadora'
@@ -580,7 +673,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             name='dataAbertura'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de abertura</FormLabel>
+                <Rotulo obrigatorio>Data de abertura</Rotulo>
                 <FormControl>
                   <DatePicker
                     selected={field.value}
@@ -674,6 +767,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
             Cancelar
           </Button>
         </div>
+        {dialogoDescarte}
       </form>
     </Form>
   )

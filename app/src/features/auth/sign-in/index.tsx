@@ -21,7 +21,7 @@ export function SignIn() {
         <CardHeader>
           <CardTitle className='text-lg tracking-tight'>Entrar</CardTitle>
           <CardDescription>
-            Informe seu e-mail e senha para acessar
+            Informe seu e-mail para acessar
             <br className='max-sm:hidden' /> o sistema de gestão de vagas.
           </CardDescription>
         </CardHeader>

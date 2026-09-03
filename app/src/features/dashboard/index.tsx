@@ -50,6 +50,7 @@ import {
 // Cor de cada Status para as barras do gráfico (tokens --status-* do theme.css,
 // expostos como --color-status-* dentro do @theme).
 const statusFill: Record<StatusVaga, string> = {
+  rascunho: 'var(--color-status-rascunho)',
   aberta: 'var(--color-status-aberta)',
   suspensa: 'var(--color-status-suspensa)',
   congelada: 'var(--color-status-congelada)',
@@ -90,7 +91,7 @@ export function Dashboard() {
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>Painel</h1>
           <p className='text-muted-foreground'>
-            Visão da Gestora de RH — acompanhamento das vagas e do SLA
+            Saúde do SLA e andamento das vagas num só lugar
           </p>
         </div>
 

@@ -4,6 +4,7 @@ import { type StatusVaga } from './schema'
 // (docs/product/PRD-sistema-rh-gestao-vagas.md:164). Os dois eixos são
 // independentes (ADR 0001): isto governa só o Status (situação), nunca a Ação.
 //
+//   Rascunho          → Aberta, Cancelada
 //   Aberta            → Suspensa, Congelada, Cancelada, Finalizada
 //   Suspensa/Congelada → Aberta, Cancelada
 //   Finalizada/Cancelada → Arquivada
@@ -12,6 +13,7 @@ import { type StatusVaga } from './schema'
 // "A confirmar no planejamento" no PRD — por isso vive como dado remapeável, e o
 // teste guiado com as usuárias valida a matriz.
 export const TRANSICOES: Record<StatusVaga, StatusVaga[]> = {
+  rascunho: ['aberta', 'cancelada'],
   aberta: ['suspensa', 'congelada', 'cancelada', 'finalizada'],
   suspensa: ['aberta', 'cancelada'],
   congelada: ['aberta', 'cancelada'],

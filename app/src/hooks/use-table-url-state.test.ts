@@ -373,4 +373,76 @@ describe('useTableUrlState', () => {
       tag: 'x|y',
     })
   })
+
+  it('builds custom (object) column filters from search, presence by null/undefined', async () => {
+    const navigate = vi.fn() as Mock<NavigateFn>
+    const deserialize = (v: unknown) => {
+      const { de, ate } = (v ?? {}) as { de?: string; ate?: string }
+      return de || ate ? { de, ate } : undefined
+    }
+    const { result, act } = await renderHook(() =>
+      useTableUrlState({
+        search: { periodo: { de: '2026-01-05', ate: '2026-01-20' } },
+        navigate,
+        pagination: { defaultPage: 1, defaultPageSize: 10 },
+        columnFilters: [
+          {
+            columnId: 'dataAbertura',
+            searchKey: 'periodo',
+            type: 'custom',
+            serialize: (v) => v,
+            deserialize,
+          },
+        ],
+      })
+    )
+
+    expect(result.current.columnFilters).toEqual([
+      { id: 'dataAbertura', value: { de: '2026-01-05', ate: '2026-01-20' } },
+    ])
+
+    await act(() => {
+      result.current.onColumnFiltersChange([
+        { id: 'dataAbertura', value: { de: '2026-02-01', ate: undefined } },
+      ])
+    })
+
+    expect(
+      applyLastSearchFn(navigate, { periodo: { de: '2026-01-05' } })
+    ).toMatchObject({ periodo: { de: '2026-02-01' } })
+
+    // Remover o filtro limpa a chave na URL (undefined), não grava objeto vazio
+    await act(() => {
+      result.current.onColumnFiltersChange([])
+    })
+
+    expect(
+      applyLastSearchFn(navigate, { periodo: { de: '2026-02-01' } })?.periodo
+    ).toBeUndefined()
+  })
+
+  it('omits custom column filter when search has no value or deserialize returns undefined', async () => {
+    const navigate = vi.fn() as Mock<NavigateFn>
+    const { result } = await renderHook(() =>
+      useTableUrlState({
+        search: { periodo: {} },
+        navigate,
+        pagination: { defaultPage: 1, defaultPageSize: 10 },
+        columnFilters: [
+          {
+            columnId: 'dataAbertura',
+            searchKey: 'periodo',
+            type: 'custom',
+            serialize: (v) => v,
+            deserialize: (v) => {
+              const { de, ate } = (v ?? {}) as { de?: string; ate?: string }
+              return de || ate ? { de, ate } : undefined
+            },
+          },
+        ],
+      })
+    )
+
+    expect(result.current.columnFilters).toEqual([])
+  })
 })

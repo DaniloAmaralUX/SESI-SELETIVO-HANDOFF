@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ACAO_LABELS, STATUS_LABELS, labelDoCampo } from './campos'
 import {
+  OBSERVACAO_MAX_CHARS,
   type AcaoVaga,
   type EventoHistorico,
   type StatusVaga,
@@ -29,6 +30,12 @@ type VagasState = {
     motivo?: string
   ) => void
   mudarAcao: (id: string, acao: AcaoVaga, dataAcao: Date, por: string) => void
+  adicionarObservacao: (
+    id: string,
+    etapa: AcaoVaga,
+    texto: string,
+    por: string
+  ) => void
   importar: (novas: Array<Omit<Vaga, 'id'>>, por: string) => Vaga[]
 }
 
@@ -90,8 +97,10 @@ export const useVagasStore = create<VagasState>()((set, get) => ({
       pcd: input.pcd,
       recrutadora: input.recrutadora,
       dataAbertura: input.dataAbertura,
-      // Ao criar, nasce Aberta na etapa inicial e o SLA começa (B5).
-      status: 'aberta',
+      // Ao criar, nasce em Rascunho na etapa inicial; o SLA só passa a contar
+      // quando o processo entra em andamento (rascunho -> aberta), momento em
+      // que dataAbertura/dataAcao são re-carimbadas (ver mudarStatus).
+      status: 'rascunho',
       acaoAtual: 'solicitacao-recebida',
       dataAcao: input.dataAbertura,
       observacoes: input.observacoes,
@@ -128,9 +137,18 @@ export const useVagasStore = create<VagasState>()((set, get) => ({
         if (vaga.id !== id) return vaga
         if (!podeTransicionar(vaga.status, novo)) return vaga
         const encerra = novo === 'cancelada' || novo === 'finalizada'
+        // Rascunho -> Aberta é o momento em que o processo abre de fato:
+        // dataAbertura/dataAcao são re-carimbadas para o SLA contar a partir
+        // daqui (a data digitada no rascunho é substituída; ajustável na
+        // edição). Rascunho -> Cancelada NÃO abre nada — o rascunho morre com
+        // a data que a recrutadora digitou, que é o dado histórico dela.
+        const abreDeFato = vaga.status === 'rascunho' && novo === 'aberta'
         return {
           ...vaga,
           status: novo,
+          ...(abreDeFato
+            ? { dataAbertura: new Date(), dataAcao: new Date() }
+            : {}),
           ...(encerra ? { dataEncerramento: new Date() } : {}),
           ...(novo === 'cancelada' ? { motivoCancelamento: motivo } : {}),
           atualizadoEm: new Date(),
@@ -165,6 +183,35 @@ export const useVagasStore = create<VagasState>()((set, get) => ({
               'mudanca-acao',
               por,
               `Ação atual: ${ACAO_LABELS[vaga.acaoAtual]} → ${ACAO_LABELS[acao]}`
+            ),
+          ],
+        }
+      }),
+    })),
+
+  adicionarObservacao: (id, etapa, texto, por) =>
+    set((state) => ({
+      vagas: state.vagas.map((vaga) => {
+        if (vaga.id !== id) return vaga
+        // O limite vive no schema e é a regra, não um detalhe do textarea:
+        // a porta de persistência é o contrato que o backend real vai herdar,
+        // e uma observação acima do limite quebraria a validação na leitura.
+        const t = texto.trim().slice(0, OBSERVACAO_MAX_CHARS)
+        if (!t) return vaga
+        return {
+          ...vaga,
+          observacoesEtapas: [
+            ...(vaga.observacoesEtapas ?? []),
+            { etapa, texto: t, em: new Date(), por },
+          ],
+          atualizadoEm: new Date(),
+          atualizadoPor: por,
+          historico: [
+            ...(vaga.historico ?? []),
+            evento(
+              'observacao',
+              por,
+              `Observação em ${ACAO_LABELS[etapa]}: ${t}`
             ),
           ],
         }

@@ -68,15 +68,18 @@ describe('resumoSla (vagas ativas)', () => {
 })
 
 describe('contagens', () => {
-  it('contagemPorStatus cobre os 6 status na ordem canônica', () => {
+  it('contagemPorStatus cobre os 7 status na ordem canônica', () => {
     const vagas = [
       vaga({ status: 'aberta' }),
       vaga({ status: 'aberta' }),
       vaga({ status: 'cancelada', motivoCancelamento: 'x' }),
     ]
     const c = contagemPorStatus(vagas)
-    expect(c).toHaveLength(6)
-    expect(c[0]).toMatchObject({ status: 'aberta', total: 2 })
+    expect(c).toHaveLength(7)
+    expect(c.find((x) => x.status === 'aberta')).toMatchObject({
+      status: 'aberta',
+      total: 2,
+    })
     expect(c.find((x) => x.status === 'cancelada')?.total).toBe(1)
     expect(c.find((x) => x.status === 'suspensa')?.total).toBe(0)
   })

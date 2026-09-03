@@ -5,21 +5,22 @@ export function UnauthorisedError() {
   const navigate = useNavigate()
   const { history } = useRouter()
   return (
-    <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <h1 className='text-[7rem] leading-tight font-bold'>401</h1>
-        <span className='font-medium'>Unauthorized Access</span>
+    <main className='min-h-svh'>
+      <div className='m-auto flex min-h-svh w-full flex-col items-center justify-center gap-2'>
+        <p aria-hidden='true' className='text-[7rem] leading-tight font-bold'>
+          401
+        </p>
+        <h1 className='text-xl font-medium'>Sessão expirada</h1>
         <p className='text-center text-muted-foreground'>
-          Please log in with the appropriate credentials <br /> to access this
-          resource.
+          Entre novamente para acessar esta área.
         </p>
         <div className='mt-6 flex gap-4'>
           <Button variant='outline' onClick={() => history.go(-1)}>
-            Go Back
+            Voltar
           </Button>
-          <Button onClick={() => navigate({ to: '/' })}>Back to Home</Button>
+          <Button onClick={() => navigate({ to: '/' })}>Entrar</Button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

@@ -39,6 +39,7 @@
   --sidebar-ring: oklch(0.785 0.164 77.6); /* foco âmbar no rail escuro */
 
   /* Status da Vaga — fundo de badge; no tema claro usar texto branco (AA >= 4.5:1) */
+  --status-rascunho: oklch(0.53 0.09 295); /* violeta neutro — em preparação */
   --status-aberta: oklch(0.55 0.145 250); /* azul SESI */
   --status-suspensa: oklch(0.52 0.11 70); /* âmbar */
   --status-congelada: oklch(0.52 0.085 220); /* ciano frio */
@@ -90,6 +91,7 @@
   --sidebar-ring: oklch(0.8 0.16 78);
 
   /* Status da Vaga — mesma matiz do tema claro, mais claros; usar texto escuro (AA >= 4.5:1) */
+  --status-rascunho: oklch(0.77 0.085 295); /* violeta neutro — em preparação */
   --status-aberta: oklch(0.72 0.14 250); /* azul SESI */
   --status-suspensa: oklch(0.8 0.14 80); /* âmbar */
   --status-congelada: oklch(0.78 0.12 220); /* ciano frio */
@@ -148,6 +150,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* habilita bg-status-aberta, text-sla-estourado etc. */
+  --color-status-rascunho: var(--status-rascunho);
   --color-status-aberta: var(--status-aberta);
   --color-status-suspensa: var(--status-suspensa);
   --color-status-congelada: var(--status-congelada);

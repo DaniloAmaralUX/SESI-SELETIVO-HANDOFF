@@ -20,18 +20,20 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 const appearanceFormSchema = z.object({
-  theme: z.enum(['light', 'dark']),
-  font: z.enum(fonts),
+  theme: z.enum(['light', 'dark'], { error: 'Escolha um tema.' }),
+  font: z.enum(fonts, { error: 'Escolha uma fonte.' }),
 })
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
 
 export function AppearanceForm() {
   const { font, setFont } = useFont()
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
 
   const defaultValues: Partial<AppearanceFormValues> = {
-    theme: theme as 'light' | 'dark',
+    // resolvedTheme: com tema 'system' o valor bruto não casa com o enum e o
+    // form nascia inválido
+    theme: resolvedTheme,
     font,
   }
 
@@ -94,6 +96,7 @@ export function AppearanceForm() {
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 className='grid max-w-md grid-cols-2 gap-8 pt-2'
+                aria-label='Tema'
               >
                 <FormItem>
                   <FormLabel className='[&:has([data-state=checked])>div]:border-primary'>

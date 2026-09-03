@@ -13,24 +13,31 @@ export function GeneralError({
   const navigate = useNavigate()
   const { history } = useRouter()
   return (
-    <div className={cn('h-svh w-full', className)}>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
+    <main className={cn('min-h-svh w-full', className)}>
+      <div className='m-auto flex min-h-svh w-full flex-col items-center justify-center gap-2'>
         {!minimal && (
-          <h1 className='text-[7rem] leading-tight font-bold'>500</h1>
+          <p aria-hidden='true' className='text-[7rem] leading-tight font-bold'>
+            500
+          </p>
         )}
-        <span className='font-medium'>Oops! Something went wrong {`:')`}</span>
+        <h1 className='text-xl font-medium'>
+          Não foi possível carregar a página
+        </h1>
         <p className='text-center text-muted-foreground'>
-          We apologize for the inconvenience. <br /> Please try again later.
+          Tente novamente em instantes. <br />
+          Se persistir, procure o suporte do SESI.
         </p>
         {!minimal && (
           <div className='mt-6 flex gap-4'>
             <Button variant='outline' onClick={() => history.go(-1)}>
-              Go Back
+              Voltar
             </Button>
-            <Button onClick={() => navigate({ to: '/' })}>Back to Home</Button>
+            <Button onClick={() => navigate({ to: '/' })}>
+              Ir para o início
+            </Button>
           </div>
         )}
       </div>
-    </div>
+    </main>
   )
 }

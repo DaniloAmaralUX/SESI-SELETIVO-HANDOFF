@@ -175,9 +175,10 @@ export function Relatorios() {
               <EmptyMedia variant='icon'>
                 <BarChart3 />
               </EmptyMedia>
-              <EmptyTitle>Nenhuma vaga no recorte</EmptyTitle>
+              <EmptyTitle>Nenhuma vaga no período</EmptyTitle>
               <EmptyDescription>
-                Ajuste o período ou limpe as datas para ver os dados.
+                Nenhuma vaga foi aberta entre as datas selecionadas. Ajuste ou
+                limpe o período para ver os recortes.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
