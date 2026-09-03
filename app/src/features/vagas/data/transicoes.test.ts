@@ -7,6 +7,16 @@ import {
 } from './transicoes'
 
 describe('transições de Status (matriz B1)', () => {
+  it('Rascunho vai para Aberta (inicia o processo) ou Cancelada', () => {
+    expect(transicoesPermitidas('rascunho')).toEqual(['aberta', 'cancelada'])
+  })
+
+  it('nenhum status volta para Rascunho', () => {
+    for (const status of STATUS_VAGA) {
+      expect(podeTransicionar(status, 'rascunho')).toBe(false)
+    }
+  })
+
   it('Aberta permite Suspensa, Congelada, Cancelada e Finalizada', () => {
     expect(transicoesPermitidas('aberta')).toEqual([
       'suspensa',

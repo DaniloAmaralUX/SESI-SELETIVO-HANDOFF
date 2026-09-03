@@ -79,4 +79,4 @@ O `app/` foi iniciado a partir do template open-source **[`shadcn-admin`](https:
 um histórico limpo, focado no produto SESI; a licença original do template está em
 [`app/LICENSE`](app/LICENSE). O plano de reaproveitamento do template está em
 [docs/product/PRD-review-e-plano-reaproveitamento.md](docs/product/PRD-review-e-plano-reaproveitamento.md)
-e no [estudo do shadcn/ui](docs/engineering/estudo-shadcn.md).
+e no [estudo do shadcn/ui](docs/engineering/estudo-shadcn.md). Inventário completo de licenças de terceiros em [NOTICE.md](NOTICE.md).

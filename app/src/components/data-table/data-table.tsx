@@ -142,6 +142,8 @@ export function DataTable<TData>({
     onColumnFiltersChange,
   })
 
+  const totalFiltrado = table.getFilteredRowModel().rows.length
+
   const pageCount = table.getPageCount()
   useEffect(() => {
     ensurePageInRange(pageCount)
@@ -175,6 +177,13 @@ export function DataTable<TData>({
               : toolbarActions
           }
         />
+      )}
+      {toolbar && (
+        <p role='status' className='text-sm text-muted-foreground'>
+          {totalFiltrado === 1
+            ? '1 registro encontrado'
+            : `${totalFiltrado} registros encontrados`}
+        </p>
       )}
       {mobileView && <div className='md:hidden'>{mobileView(table)}</div>}
       <div
