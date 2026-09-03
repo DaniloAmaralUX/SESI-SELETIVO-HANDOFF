@@ -71,6 +71,22 @@ Detalhes em **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
 
+## Duas versões do protótipo
+
+Este repositório é a **versão de referência visual** (identidade shadcn-admin padrão). Existe uma
+segunda linha com o mesmo domínio, as mesmas regras de negócio e as mesmas correções funcionais,
+diferindo **apenas na camada visual** (identidade SESI, painel e login redesenhados):
+
+| Versão | Repositório | Demo |
+|---|---|---|
+| **Clássica** (este repo) | https://github.com/DaniloAmaralUX/SESI- | https://sesi-prototipo-v1-2.vercel.app |
+| **Design melhorado** | https://github.com/DaniloAmaralUX/SESI-SELETIVO-HANDOFF | https://app-nine-chi-65.vercel.app |
+
+O backend a ser construído é o mesmo para as duas — o contrato está em
+[docs/engineering/contrato-api.md](docs/engineering/contrato-api.md) e o guia em
+[docs/engineering/handoff-backend.md](docs/engineering/handoff-backend.md). Escolha uma linha
+para o front e siga com ela; portar mudanças de uma para a outra é trabalho de UI, não de domínio.
+
 ## Proveniência
 
 O `app/` foi iniciado a partir do template open-source **[`shadcn-admin`](https://github.com/satnaing/shadcn-admin)**
