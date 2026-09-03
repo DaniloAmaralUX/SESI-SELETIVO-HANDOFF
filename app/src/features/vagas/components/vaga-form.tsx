@@ -138,7 +138,7 @@ function CriarForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         <NotaObrigatorios />
-        <div className='grid gap-4 sm:grid-cols-2'>
+        <div className='grid items-start gap-x-6 gap-y-5 sm:grid-cols-2'>
           <FormField
             control={form.control}
             name='chamado'
@@ -456,7 +456,7 @@ function EditarForm({ vaga }: { vaga: Vaga }) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         <NotaObrigatorios />
-        <div className='grid gap-4 sm:grid-cols-2'>
+        <div className='grid items-start gap-x-6 gap-y-5 sm:grid-cols-2'>
           <FormField
             control={form.control}
             name='chamado'

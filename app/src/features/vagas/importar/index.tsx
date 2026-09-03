@@ -369,7 +369,7 @@ export function ImportarVagas() {
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <dl className='grid gap-4 sm:grid-cols-3'>
+              <dl className='grid items-start gap-4 sm:grid-cols-3'>
                 <Resumo titulo='Serão importadas' valor={novas.length} />
                 <Resumo
                   titulo='Duplicadas ignoradas'
